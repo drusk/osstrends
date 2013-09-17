@@ -25,9 +25,6 @@ import requests
 
 from geocodestats import auth
 
-GH_API_URL_BASE = "https://api.github.com"
-GH_SEARCH_HEADERS = {"Accept": "application/vnd.github.preview"}
-
 # The locations to lookup users from
 LOCATIONS = ["victoria", "vancouver"]
 
@@ -92,53 +89,60 @@ class MongoDatabase(object):
         )
 
 
-def search_github_users_by_location(location):
+class GitHubSearcher(object):
     """
-    Search for GitHub users who list their location.
-
-    Args:
-      location: str
-        The location value to look for.
-
-    Returns:
-      users: list of JSON objects with user data
-             (see http://developer.github.com/v3/users/)
-        A list of users who matched the location.
+    Performs searches on the GitHub API.
     """
 
-    def http_get(url, params=None):
+    GH_API_URL_BASE = "https://api.github.com"
+    GH_SEARCH_HEADERS = {"Accept": "application/vnd.github.preview"}
+
+    def search_users_by_location(self, location):
+        """
+        Search for GitHub users who list their location.
+
+        Args:
+          location: str
+            The location value to look for.
+
+        Returns:
+          users: list of JSON objects with user data
+                 (see http://developer.github.com/v3/users/)
+            A list of users who matched the location.
+        """
+        response = self._http_get("{}/search/users".format(self.GH_API_URL_BASE),
+                                  params={
+                                      "q": "location:{}".format(location),
+                                      # use max page size to reduce API calls needed
+                                      "per_page": 100
+                                  }
+        )
+
+        users = self._parse_users(response)
+
+        while True:
+            try:
+                next_url = response.links["next"]["url"]
+            except KeyError:
+                # No more pages to read
+                break
+
+            response = self._http_get(next_url)
+            users.extend(self._parse_users(response))
+
+        return users
+
+    def _http_get(self, url, params=None):
         return requests.get(url,
                             params=params,
-                            headers=GH_SEARCH_HEADERS,
+                            headers=self.GH_SEARCH_HEADERS,
                             auth=(auth.GH_AUTH_USERNAME, auth.GH_AUTH_TOKEN))
 
-    response = http_get("{}/search/users".format(GH_API_URL_BASE),
-                        params={
-                            "q": "location:{}".format(location),
-                            # use max page size to reduce API calls needed
-                            "per_page": 100
-                        }
-    )
-
-    def parse_users(response):
+    def _parse_users(self, response):
         try:
             return response.json()["items"]
         except KeyError:
             print response.json()
-
-    users = parse_users(response)
-
-    while True:
-        try:
-            next_url = response.links["next"]["url"]
-        except KeyError:
-            # No more pages to read
-            break
-
-        response = http_get(next_url)
-        users.extend(parse_users(response))
-
-    return users
 
 
 def download_users():
@@ -146,6 +150,7 @@ def download_users():
     Downloads users for each location.
     """
     db = MongoDatabase()
+    searcher = GitHubSearcher()
     for location in LOCATIONS:
-        users = search_github_users_by_location(location)
+        users = searcher.search_users_by_location(location)
         db.insert_users_by_location(location, users)
