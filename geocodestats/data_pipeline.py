@@ -28,26 +28,68 @@ from geocodestats import auth
 GH_API_URL_BASE = "https://api.github.com"
 GH_SEARCH_HEADERS = {"Accept": "application/vnd.github.preview"}
 
-# MongoDB constants
-DB_NAME = "geocodestats"
-USERS_LOCATIONS = "users_locations"
-
-# Keys used in MongoDB databases
-LOCATION_KEY = "location"
-USERS_KEY = "users"
-
 # The locations to lookup users from
 LOCATIONS = ["victoria", "vancouver"]
 
 
-def get_collection(collection_name, db_name=DB_NAME, host="localhost", port=27017):
+class MongoDatabase(object):
     """
-    Returns a handle to the specified MongoDB database collection.
+    Performs database insertions and queries.
     """
-    client = pymongo.MongoClient(
-        "mongodb://{host}:{port}".format(host=host, port=port)
-    )
-    return client[db_name][collection_name]
+
+    DEFAULT_DB_NAME = "geocodestats"
+    USERS_LOCATIONS = "users_locations"
+    LOCATION_KEY = "location"
+    USERS_KEY = "users"
+
+    def __init__(self, db_name=DEFAULT_DB_NAME, host="localhost", port=27017):
+        self._client = pymongo.MongoClient(
+            "mongodb://{host}:{port}".format(host=host, port=port)
+        )
+        self._db = self._client[db_name]
+
+    def _get_collection(self, collection_name):
+        """
+        Returns a handle to the specified MongoDB database collection.
+        """
+        return self._db[collection_name]
+
+    def get_users_by_location(self, location):
+        """
+        Lookup users by location from the database.
+
+        Args:
+          location: str
+            Find users from this location (ex: Victoria).
+
+        Returns:
+          users: list(dict)
+            A list of user information objects
+            (http://developer.github.com/v3/users/).
+            Returns an empty list if there are no users for that location.
+        """
+        result = self._get_collection(self.USERS_LOCATIONS).find_one(
+            {self.LOCATION_KEY: location}
+        )
+
+        if result is None:
+            return []
+
+        return result[self.USERS_KEY]
+
+    def insert_users_by_location(self, location, users):
+        """
+        Associate a collection of users with a location in the database.
+
+        Args:
+          location: str
+            The location which the users are from.
+          users: list(dict)
+            A list of user information objects (http://developer.github.com/v3/users/)
+        """
+        self._get_collection(self.USERS_LOCATIONS).insert(
+            {self.LOCATION_KEY: location, self.USERS_KEY: users}
+        )
 
 
 def search_github_users_by_location(location):
@@ -99,40 +141,11 @@ def search_github_users_by_location(location):
     return users
 
 
-def get_users_by_location_from_db(location):
-    """
-    Lookup users by location from the database.
-
-    Args:
-      location: str
-        Find users from this location (ex: Victoria).
-
-    Returns:
-      users: list(str)
-        A list of usernames.
-    """
-    return get_collection(USERS_LOCATIONS).find_one({LOCATION_KEY: location})
-
-
-def save_users_by_location_to_db(location, users):
-    """
-    Associate a collection of users with a location in the database.
-
-    Args:
-      location: str
-        The location which the users are from.
-      users: list(str)
-        Usernames of users in the location.
-    """
-    get_collection(USERS_LOCATIONS).insert(
-        {LOCATION_KEY: location, USERS_KEY: users}
-    )
-
-
 def download_users():
     """
     Downloads users for each location.
     """
+    db = MongoDatabase()
     for location in LOCATIONS:
         users = search_github_users_by_location(location)
-        save_users_by_location_to_db(location, users)
+        db.insert_users_by_location(location, users)

@@ -27,3 +27,11 @@ Technologies:
  -requests for Github API access.
  -flask for lightweight web UI
  -MongoDB for key-value store, PostgreSQL for relational
+
+
+Problems Encountered:
+ -rate limiting on search could be a problem.  Need a back-off mechanism.
+
+  Could also look into data from from http://www.githubarchive.org/ instead
+  ex: download activity for April 2012:
+    wget http://data.githubarchive.org/2012-04-{01..31}-{0..23}.json.gz
