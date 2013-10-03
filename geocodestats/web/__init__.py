@@ -19,3 +19,28 @@
 # IN THE SOFTWARE.
 
 __author__ = "David Rusk <drusk@uvic.ca>"
+
+from flask import Flask, render_template, request
+
+from geocodestats import data_pipeline
+
+
+app = Flask(__name__)
+
+db = data_pipeline.MongoDatabase()
+
+
+@app.route("/")
+def location_selection():
+    return render_template("location_selection.html")
+
+
+@app.route("/users")
+def users_by_location():
+    location = request.args["location"]
+    users = db.get_users_by_location(location)
+    return render_template("users.html", location=location, users=users)
+
+
+if __name__ == "__main__":
+    app.run()

@@ -1,0 +1,24 @@
+{% extends "location_selection.html" %}
+{% block results %}
+    <h2 class="page-header" align="center">Users in {{ location }}:</h2>
+
+    <div class="container">
+        <div class="col-lg-offset-2 col-lg-8">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>GitHub Username</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td><a href="{{ user.html_url }}">{{ user.login }}</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

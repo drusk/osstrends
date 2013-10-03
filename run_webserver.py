@@ -20,17 +20,6 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
-from flask import Flask, render_template
+from geocodestats.web import app
 
-app = Flask(__name__)
-
-app.config["DEBUG"] = True
-
-
-@app.route("/")
-def homepage():
-    return render_template("homepage.html")
-
-
-if __name__ == "__main__":
-    app.run()
+app.run(debug=True)
