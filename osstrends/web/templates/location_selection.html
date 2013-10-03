@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Geo-Code-Stats</title>
+        <title>OSS Trends</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <!-- Include the bootstrap stylesheets -->
@@ -9,18 +9,18 @@
     </head>
     <body>
         <div class="container">
-            <h1>Software development activity statistics by geographical location.</h1>
+            <h1 class="col-lg-offset-2">Find software developers who list their location</h1>
         </div>
 
-        <form action="{{ url_for("users_by_location") }}" class="form-horizontal" role="form">
+        <form action="{{ url_for("users_by_location") }}" class="form-horizontal col-lg-offset-2" role="form">
             <div class="form-group">
-                <label for="input_location" class="col-lg-2 control-label">Location</label>
+                <label for="location" class="col-lg-2 control-label">Location</label>
                 <div class="col-lg-6">
                     <input type="text" class="form-control" name="location" id="location" placeholder="Enter location">
                 </div>
             </div>
             <div class="form-group">
-                <div class="col-lg-offset-2 col-lg-10">
+                <div class="col-lg-offset-4 col-lg-10">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
             </div>
