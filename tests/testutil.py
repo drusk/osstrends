@@ -20,35 +20,17 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
-import unittest
-
-from hamcrest import assert_that, has_length
-import httpretty
-
-from osstrends import data_pipeline
-from tests import testutil
+import os
 
 
-class GitHubSearcherTest(unittest.TestCase):
-    def setUp(self):
-        self.searcher = data_pipeline.GitHubSearcher()
+def read(filename):
+    """
+    Handles path resolution and reads the contents of a test data file.
 
-    @httpretty.activate
-    def test_search_users_by_location_in_single_call(self):
-        response_data = testutil.read("victoria_search_page1.json")
+    Returns:
+      file_contents: str
+    """
+    full_path = os.path.join(os.path.dirname(__file__), filename)
 
-        httpretty.register_uri(httpretty.GET,
-                               "https://api.github.com/search/users",
-                               responses=[
-                                   httpretty.Response(
-                                       body=response_data,
-                                       status=200)
-                               ])
-
-        users = self.searcher.search_users_by_location("victoria")
-
-        assert_that(users, has_length(100))
-
-
-if __name__ == '__main__':
-    unittest.main()
+    with open(full_path, "rb") as filehandle:
+        return filehandle.read()

@@ -27,6 +27,7 @@ from hamcrest import assert_that, has_length
 import pymongo
 
 from osstrends import data_pipeline
+from tests import testutil
 
 TEST_DB_NAME = "test-osstrends"
 
@@ -42,9 +43,8 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
         retrieved_users = db.get_users_by_location(location)
         assert_that(retrieved_users, has_length(0))
 
-        with open("victoria_users.json", "rb") as fh:
-            users = json.loads(fh.read())
-            assert_that(users, has_length(649))
+        users = json.loads(testutil.read("victoria_users.json"))
+        assert_that(users, has_length(649))
 
         db.insert_users_by_location(location, users)
         retrieved_users = db.get_users_by_location(location)
