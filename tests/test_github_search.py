@@ -20,7 +20,35 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
-from osstrends.web import app
+import unittest
 
-if __name__ == "__main__":
-    app.run(debug=True)
+from hamcrest import assert_that, has_length
+import httpretty
+
+from osstrends import data_pipeline
+
+
+class GitHubSearcherTest(unittest.TestCase):
+    def setUp(self):
+        self.searcher = data_pipeline.GitHubSearcher()
+
+    @httpretty.activate
+    def test_search_users_by_location_in_single_call(self):
+        with open("victoria_search_page1.json", "rb") as fh:
+            response_data = fh.read()
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://api.github.com/search/users",
+                               responses=[
+                                   httpretty.Response(
+                                       body=response_data,
+                                       status=200)
+                               ])
+
+        users = self.searcher.search_users_by_location("victoria")
+
+        assert_that(users, has_length(100))
+
+
+if __name__ == '__main__':
+    unittest.main()
