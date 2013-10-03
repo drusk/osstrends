@@ -1,7 +1,7 @@
-geo-code-stats
+OSS Trends
 ==============
 
-Software development activity statistics by geographical location.
+Open Source Software development activity by geographical location.
 
 Design
 ======
