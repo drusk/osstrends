@@ -20,6 +20,6 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
-from geocodestats.web import app
+from osstrends.web import app
 
 app.run(debug=True)

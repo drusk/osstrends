@@ -26,9 +26,9 @@ import unittest
 from hamcrest import assert_that, has_length
 import pymongo
 
-from geocodestats import data_pipeline
+from osstrends import data_pipeline
 
-TEST_DB_NAME = "test-geocodestats"
+TEST_DB_NAME = "test-osstrends"
 
 
 class MongoDatabaseIntegrationTest(unittest.TestCase):

@@ -22,7 +22,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 from flask import Flask, render_template, request
 
-from geocodestats import data_pipeline
+from osstrends import data_pipeline
 
 
 app = Flask(__name__)

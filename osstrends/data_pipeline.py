@@ -23,7 +23,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 import pymongo
 import requests
 
-from geocodestats import auth
+from osstrends import auth
 
 # The locations to lookup users from
 LOCATIONS = ["victoria", "vancouver"]
@@ -34,7 +34,7 @@ class MongoDatabase(object):
     Performs database insertions and queries.
     """
 
-    DEFAULT_DB_NAME = "geocodestats"
+    DEFAULT_DB_NAME = "osstrends"
     USERS_LOCATIONS = "users_locations"
     LOCATION_KEY = "location"
     USERS_KEY = "users"
