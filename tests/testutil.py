@@ -22,6 +22,8 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 import os
 
+DATA_FOLDER = "data"
+
 
 def read(filename):
     """
@@ -30,7 +32,7 @@ def read(filename):
     Returns:
       file_contents: str
     """
-    full_path = os.path.join(os.path.dirname(__file__), filename)
+    full_path = os.path.join(os.path.dirname(__file__), DATA_FOLDER, filename)
 
     with open(full_path, "rb") as filehandle:
         return filehandle.read()
