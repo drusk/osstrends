@@ -37,19 +37,26 @@ class DataPipelineTest(unittest.TestCase):
         location1 = "victoria"
         location2 = "vancouver"
 
-        location1_user1 = "drusk"
+        def create_user(login):
+            return {"login": login}
+
+        location1_user1_login = "drusk"
+        location1_user1 = create_user(location1_user1_login)
         location1_user1_stats = {"Python": 10, "Java": 5}
 
-        location1_user2 = "rrusk"
+        location1_user2_login = "rrusk"
+        location1_user2 = create_user(location1_user2_login)
         location1_user2_stats = {"C": 15, "Java": 8}
 
-        location2_user1 = "brian"
+        location2_user1_login = "brian"
+        location2_user1 = create_user(location2_user1_login)
         location2_user1_stats = {"C#": 9, "Shell": 2}
 
         # Mock user-location search
         def get_users(location):
             lookup = {
-                location1: [location1_user1, location1_user2],
+                location1: [location1_user1,
+                            location1_user2],
                 location2: [location2_user1]
             }
             try:
@@ -62,9 +69,9 @@ class DataPipelineTest(unittest.TestCase):
         # Mock user-language searches
         def get_language_stats(user):
             lookup = {
-                location1_user1: location1_user1_stats,
-                location1_user2: location1_user2_stats,
-                location2_user1: location2_user1_stats
+                location1_user1_login: location1_user1_stats,
+                location1_user2_login: location1_user2_stats,
+                location2_user1_login: location2_user1_stats
             }
             try:
                 return lookup[user]
@@ -93,17 +100,17 @@ class DataPipelineTest(unittest.TestCase):
 
         assert_that(self.searcher.get_user_language_stats.call_args_list,
                     contains(
-                        call(location1_user1),
-                        call(location1_user2),
-                        call(location2_user1)
+                        call(location1_user1_login),
+                        call(location1_user2_login),
+                        call(location2_user1_login)
                     )
         )
 
         assert_that(self.db.insert_user_language_stats.call_args_list,
                     contains(
-                        call(location1_user1, location1_user1_stats),
-                        call(location1_user2, location1_user2_stats),
-                        call(location2_user1, location2_user1_stats)
+                        call(location1_user1_login, location1_user1_stats),
+                        call(location1_user2_login, location1_user2_stats),
+                        call(location2_user1_login, location2_user1_stats)
                     ))
 
 

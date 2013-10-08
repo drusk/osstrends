@@ -21,12 +21,15 @@
 __author__ = "David Rusk <drusk@uvic.ca>"
 
 import collections
+import logging
 import urlparse
 
 import pymongo
 import requests
 
 from osstrends import auth
+
+logger = logging.getLogger(__name__)
 
 # The locations to lookup users from
 LOCATIONS = ["victoria", "vancouver"]
@@ -329,12 +332,27 @@ class DataPipeline(object):
         Runs the pipeline.
         """
         for location in self.locations:
+            logger.info("Starting to process location: {}".format(location))
+
             users = self.searcher.search_users_by_location(location)
             self.db.insert_users_by_location(location, users)
 
+            logger.info("Got users for location: {}".format(
+                location))
+
             for user in users:
-                language_stats = self.searcher.get_user_language_stats(user)
-                self.db.insert_user_language_stats(user, language_stats)
+                userid = user["login"]
+
+                logger.info(
+                    "Starting collection of language stats for user: {}".format(
+                        userid))
+
+                language_stats = self.searcher.get_user_language_stats(userid)
+                self.db.insert_user_language_stats(userid, language_stats)
+
+                logger.info(
+                    "Finished collecting language stats for user: {}".format(
+                        userid))
 
 
 def execute():
