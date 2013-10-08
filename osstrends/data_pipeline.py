@@ -121,7 +121,10 @@ class GitHubSearcher(object):
                                      }
         )
 
-        users = self._parse_users(response)
+        def parse_users(response):
+            return response.json()["items"]
+
+        users = parse_users(response)
 
         while True:
             try:
@@ -131,7 +134,7 @@ class GitHubSearcher(object):
                 break
 
             response = self._gh_http_get(next_url)
-            users.extend(self._parse_users(response))
+            users.extend(parse_users(response))
 
         return users
 
@@ -256,12 +259,6 @@ class GitHubSearcher(object):
                             params=params,
                             headers=self.GH_SEARCH_HEADERS,
                             auth=(auth.GH_AUTH_USERNAME, auth.GH_AUTH_TOKEN))
-
-    def _parse_users(self, response):
-        try:
-            return response.json()["items"]
-        except KeyError:
-            print response.json()
 
 
 def download_users():
