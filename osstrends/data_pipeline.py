@@ -304,12 +304,41 @@ class GitHubSearcher(object):
                             auth=(auth.GH_AUTH_USERNAME, auth.GH_AUTH_TOKEN))
 
 
-def download_users():
+class DataPipeline(object):
     """
-    Downloads users for each location.
+    The main pipeline for acquiring the application's data.
     """
-    db = MongoDatabase()
-    searcher = GitHubSearcher()
-    for location in LOCATIONS:
-        users = searcher.search_users_by_location(location)
-        db.insert_users_by_location(location, users)
+
+    def __init__(self, db, searcher, locations):
+        """
+        Constructor.
+
+        Args:
+          db: interface for the database that will store the data retrieved.
+          searcher: interface for the search service that will retrieve the
+            data.
+          locations: list(str)
+            The locations to be included in the data retrieval.
+        """
+        self.db = db
+        self.searcher = searcher
+        self.locations = locations
+
+    def execute(self):
+        """
+        Runs the pipeline.
+        """
+        for location in self.locations:
+            users = self.searcher.search_users_by_location(location)
+            self.db.insert_users_by_location(location, users)
+
+            for user in users:
+                language_stats = self.searcher.get_user_language_stats(user)
+                self.db.insert_user_language_stats(user, language_stats)
+
+
+def execute():
+    """
+    Executes the data pipeline with default parameters.
+    """
+    DataPipeline(MongoDatabase(), GitHubSearcher(), LOCATIONS).execute()
