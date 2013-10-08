@@ -22,7 +22,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 import unittest
 
-from hamcrest import assert_that, has_length
+from hamcrest import assert_that, has_length, contains_inanyorder
 import httpretty
 
 from osstrends import data_pipeline
@@ -48,6 +48,41 @@ class GitHubSearcherTest(unittest.TestCase):
         users = self.searcher.search_users_by_location("victoria")
 
         assert_that(users, has_length(100))
+
+    @httpretty.activate
+    def test_search_repos_by_user(self):
+        response_data = testutil.read("user_repos.json")
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://api.github.com/users/drusk/repos",
+                               responses=[
+                                   httpretty.Response(
+                                       body=response_data,
+                                       status=200
+                                   )
+                               ])
+
+        repos = self.searcher.search_repos_by_user("drusk")
+
+        assert_that(repos, has_length(16))
+        assert_that(repos, contains_inanyorder(
+            "MOP",
+            "scratch",
+            "fishcounter",
+            "config-files",
+            "WeightRep",
+            "drusk.github.com",
+            "algorithms",
+            "cadcVOFS",
+            "query-gateway",
+            "query-composer",
+            "pml",
+            "pml-applications",
+            "uvic-transcript-parser",
+            "archive",
+            "investment-tracker",
+            "drusk-gwt-oracle-example"
+        ))
 
 
 if __name__ == '__main__':

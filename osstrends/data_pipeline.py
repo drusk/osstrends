@@ -134,6 +134,23 @@ class GitHubSearcher(object):
 
         return users
 
+    def search_repos_by_user(self, userid):
+        """
+        Obtain the list of repositories owned by a user.
+
+        Args:
+          userid: str
+            The user's login id.
+
+        Returns:
+          repo_names: list(str)
+            A list of the repository names, not the full name.  That is, not
+            prepended with "userid/"
+        """
+        response = self._gh_http_get("/users/{}/repos".format(userid))
+
+        return [repo["name"] for repo in response.json()]
+
     def _gh_http_get(self, url, params=None, headers=None):
         """
         Performs an HTTP request for the specified GitHub API endpoint.
