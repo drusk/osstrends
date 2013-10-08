@@ -24,6 +24,7 @@ import unittest
 
 from hamcrest import assert_that, equal_to, has_length, contains_inanyorder
 import httpretty
+from mock import Mock
 
 from osstrends import data_pipeline
 from tests import testutil
@@ -142,6 +143,34 @@ class GitHubSearcherTest(unittest.TestCase):
             }
         ))
 
+    @httpretty.activate
+    def test_get_user_language_stats(self):
+        self.searcher.search_repos_by_user = Mock(return_value=["algorithms", "pml"])
+
+        self.register_uri("https://api.github.com/repos/drusk/algorithms/languages",
+                          testutil.read("language_stats_algorithms.json"))
+        self.register_uri("https://api.github.com/repos/drusk/pml/languages",
+                          testutil.read("language_stats_pml.json"))
+
+        language_stats = self.searcher.get_user_language_stats("drusk")
+
+        assert_that(language_stats, equal_to(
+            {
+                "Java": 150390,
+                "Python": 273059,
+                "Shell": 5407
+            }
+        ))
+
+    def register_uri(self, uri, response_data, status=200):
+        httpretty.register_uri(httpretty.GET,
+                               uri,
+                               responses=[
+                                   httpretty.Response(
+                                       body=response_data,
+                                       status=status
+                                   )
+                               ])
 
 if __name__ == '__main__':
     unittest.main()

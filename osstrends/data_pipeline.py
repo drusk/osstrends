@@ -20,6 +20,7 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
+import collections
 import urlparse
 
 import pymongo
@@ -171,6 +172,29 @@ class GitHubSearcher(object):
         return self._gh_http_get(
             "/repos/{}/{}/languages".format(owner, repo_name)
         ).json()
+
+    def get_user_language_stats(self, userid):
+        """
+        Looks up a user's programming languages based on their public repositories.
+
+        Args:
+          userid: str
+            The login id of the user for whom the statistics are being gathered.
+
+        Returns:
+          language_stats: dict
+            Keys are the language names, values are the number of bytes
+            written in that language.
+        """
+        user_stats = collections.defaultdict(int)
+
+        for repo in self.search_repos_by_user(userid):
+            repo_stats = self.get_repo_language_stats(userid, repo)
+
+            for language, size in repo_stats.iteritems():
+                user_stats[language] += size
+
+        return user_stats
 
     def resolve_repo_to_source(self, owner, repo_name):
         """
