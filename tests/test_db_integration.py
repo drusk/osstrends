@@ -23,7 +23,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 import json
 import unittest
 
-from hamcrest import assert_that, has_length
+from hamcrest import assert_that, equal_to, has_length
 import pymongo
 
 from osstrends import data_pipeline
@@ -36,19 +36,31 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
     def setUp(self):
         pymongo.MongoClient().drop_database(TEST_DB_NAME)
 
-    def test_save_and_retrieve_users_by_location(self):
-        db = data_pipeline.MongoDatabase(db_name=TEST_DB_NAME)
+        self.db = data_pipeline.MongoDatabase(db_name=TEST_DB_NAME)
 
+    def test_save_and_retrieve_users_by_location(self):
         location = "victoria"
-        retrieved_users = db.get_users_by_location(location)
+        retrieved_users = self.db.get_users_by_location(location)
         assert_that(retrieved_users, has_length(0))
 
         users = json.loads(testutil.read("victoria_users.json"))
         assert_that(users, has_length(649))
 
-        db.insert_users_by_location(location, users)
-        retrieved_users = db.get_users_by_location(location)
+        self.db.insert_users_by_location(location, users)
+        retrieved_users = self.db.get_users_by_location(location)
         assert_that(retrieved_users, has_length(649))
+
+    def test_save_and_retrieve_user_language_stats(self):
+        userid = "drusk"
+        language_stats = {
+            "Python": 12345,
+            "Java": 6789
+        }
+
+        self.db.insert_user_language_stats(userid, language_stats)
+
+        assert_that(self.db.get_user_language_stats(userid),
+                    equal_to(language_stats))
 
 
 if __name__ == '__main__':

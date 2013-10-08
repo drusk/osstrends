@@ -38,9 +38,16 @@ class MongoDatabase(object):
     """
 
     DEFAULT_DB_NAME = "osstrends"
+
+    # Collection storing user locations
     USERS_LOCATIONS = "users_locations"
     LOCATION_KEY = "location"
     USERS_KEY = "users"
+
+    # Collection storing user languages
+    USERS_LANGUAGES = "users_languages"
+    USER_KEY = "user"
+    LANGUAGES_KEY = "languages"
 
     def __init__(self, db_name=DEFAULT_DB_NAME, host="localhost", port=27017):
         self._client = pymongo.MongoClient(
@@ -89,6 +96,42 @@ class MongoDatabase(object):
         """
         self._get_collection(self.USERS_LOCATIONS).insert(
             {self.LOCATION_KEY: location, self.USERS_KEY: users}
+        )
+
+    def get_user_language_stats(self, userid):
+        """
+        Retrieve a user's programming language statistics.
+
+        Args:
+          userid: str
+            The login id of the user for whom the statistics are being gathered.
+
+        Returns:
+          language_stats: dict
+            Keys are the language names, values are the number of bytes
+            written in that language.
+        """
+        result = self._get_collection(self.USERS_LANGUAGES).find_one(
+            {self.USER_KEY: userid}
+        )
+
+        return result[self.LANGUAGES_KEY]
+
+    def insert_user_language_stats(self, userid, language_stats):
+        """
+        Insert language statistics data for a user into the database.
+
+        Args:
+          userid: str
+            The login id of the user for whom the statistics are being gathered.
+          language_stats: dict
+            Keys are the language names, values are the number of bytes
+            written in that language.
+
+        Returns: void
+        """
+        self._get_collection(self.USERS_LANGUAGES).insert(
+            {self.USER_KEY: userid, self.LANGUAGES_KEY: language_stats}
         )
 
 
