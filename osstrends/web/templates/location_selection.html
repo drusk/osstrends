@@ -1,32 +1,25 @@
-<!doctype html>
-<html>
-    <head>
-        <title>OSS Trends</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-        <!-- Include the bootstrap stylesheets -->
-        <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="bootstrap-3.0.0/css/bootstrap.min.css") }}">
-    </head>
-    <body>
-        <div class="container">
-            <h1 class="col-lg-offset-2">Find software developers who list their location</h1>
+{% block body %}
+    <div class="container">
+        <h1 class="col-lg-offset-2">Find software developers who list their location</h1>
+    </div>
+
+    <form action="{{ url_for("users_by_location") }}" class="form-horizontal col-lg-offset-2" role="form">
+        <div class="form-group">
+            <label for="location" class="col-lg-2 control-label">Location</label>
+
+            <div class="col-lg-6">
+                <input type="text" class="form-control" name="location" id="location" placeholder="Enter location">
+            </div>
         </div>
-
-        <form action="{{ url_for("users_by_location") }}" class="form-horizontal col-lg-offset-2" role="form">
-            <div class="form-group">
-                <label for="location" class="col-lg-2 control-label">Location</label>
-                <div class="col-lg-6">
-                    <input type="text" class="form-control" name="location" id="location" placeholder="Enter location">
-                </div>
+        <div class="form-group">
+            <div class="col-lg-offset-4 col-lg-10">
+                <button type="submit" class="btn btn-primary">Search</button>
             </div>
-            <div class="form-group">
-                <div class="col-lg-offset-4 col-lg-10">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </div>
-            </div>
-        </form>
+        </div>
+    </form>
 
     {% block results %}{% endblock %}
 
-    </body>
-</html>
+{% endblock %}
