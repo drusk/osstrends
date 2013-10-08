@@ -36,15 +36,8 @@ class GitHubSearcherTest(unittest.TestCase):
 
     @httpretty.activate
     def test_search_users_by_location_in_single_call(self):
-        response_data = testutil.read("victoria_search_page1.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "https://api.github.com/search/users",
-                               responses=[
-                                   httpretty.Response(
-                                       body=response_data,
-                                       status=200)
-                               ])
+        self.mock_uri("https://api.github.com/search/users",
+                      testutil.read("victoria_search_page1.json"))
 
         users = self.searcher.search_users_by_location("victoria")
 
@@ -52,16 +45,8 @@ class GitHubSearcherTest(unittest.TestCase):
 
     @httpretty.activate
     def test_search_repos_by_user(self):
-        response_data = testutil.read("user_repos.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "https://api.github.com/users/drusk/repos",
-                               responses=[
-                                   httpretty.Response(
-                                       body=response_data,
-                                       status=200
-                                   )
-                               ])
+        self.mock_uri("https://api.github.com/users/drusk/repos",
+                      testutil.read("user_repos.json"))
 
         repos = self.searcher.search_repos_by_user("drusk")
 
@@ -87,16 +72,8 @@ class GitHubSearcherTest(unittest.TestCase):
 
     @httpretty.activate
     def test_resolve_forked_repo_to_source(self):
-        response_data = testutil.read("repo_is_fork.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "https://api.github.com/repos/drusk/MOP",
-                               responses=[
-                                   httpretty.Response(
-                                       body=response_data,
-                                       status=200
-                                   )
-                               ])
+        self.mock_uri("https://api.github.com/repos/drusk/MOP",
+                      testutil.read("repo_is_fork.json"))
 
         owner, repo_name = self.searcher.resolve_repo_to_source("drusk", "MOP")
 
@@ -105,16 +82,8 @@ class GitHubSearcherTest(unittest.TestCase):
 
     @httpretty.activate
     def test_resolve_source_repo_to_source(self):
-        response_data = testutil.read("repo_is_source.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "https://api.github.com/repos/drusk/algorithms",
-                               responses=[
-                                   httpretty.Response(
-                                       body=response_data,
-                                       status=200
-                                   )
-                               ])
+        self.mock_uri("https://api.github.com/repos/drusk/algorithms",
+                      testutil.read("repo_is_source.json"))
 
         owner, repo_name = self.searcher.resolve_repo_to_source("drusk", "algorithms")
 
@@ -123,16 +92,8 @@ class GitHubSearcherTest(unittest.TestCase):
 
     @httpretty.activate
     def test_get_repo_language_stats(self):
-        response_data = testutil.read("language_stats_algorithms.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "https://api.github.com/repos/drusk/algorithms/languages",
-                               responses=[
-                                   httpretty.Response(
-                                       body=response_data,
-                                       status=200
-                                   )
-                               ])
+        self.mock_uri("https://api.github.com/repos/drusk/algorithms/languages",
+                      testutil.read("language_stats_algorithms.json"))
 
         language_stats = self.searcher.get_repo_language_stats("drusk", "algorithms")
 
@@ -147,10 +108,10 @@ class GitHubSearcherTest(unittest.TestCase):
     def test_get_user_language_stats(self):
         self.searcher.search_repos_by_user = Mock(return_value=["algorithms", "pml"])
 
-        self.register_uri("https://api.github.com/repos/drusk/algorithms/languages",
-                          testutil.read("language_stats_algorithms.json"))
-        self.register_uri("https://api.github.com/repos/drusk/pml/languages",
-                          testutil.read("language_stats_pml.json"))
+        self.mock_uri("https://api.github.com/repos/drusk/algorithms/languages",
+                      testutil.read("language_stats_algorithms.json"))
+        self.mock_uri("https://api.github.com/repos/drusk/pml/languages",
+                      testutil.read("language_stats_pml.json"))
 
         language_stats = self.searcher.get_user_language_stats("drusk")
 
@@ -162,7 +123,7 @@ class GitHubSearcherTest(unittest.TestCase):
             }
         ))
 
-    def register_uri(self, uri, response_data, status=200):
+    def mock_uri(self, uri, response_data, status=200):
         httpretty.register_uri(httpretty.GET,
                                uri,
                                responses=[
@@ -171,6 +132,7 @@ class GitHubSearcherTest(unittest.TestCase):
                                        status=status
                                    )
                                ])
+
 
 if __name__ == '__main__':
     unittest.main()
