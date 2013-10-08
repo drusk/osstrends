@@ -151,6 +151,27 @@ class GitHubSearcher(object):
 
         return [repo["name"] for repo in response.json()]
 
+    def get_repo_language_stats(self, owner, repo_name):
+        """
+        Looks up statistics of the languages used in a repository.
+
+        Args:
+          owner: str
+            The login id for the user who owns the repository being looked
+            up.
+          repo_name: str
+            The repository name, not the full name.  That is, not
+            prepended with "userid/"
+
+        Returns:
+          language_stats: dict
+            Keys are the language names, values are the number of bytes
+            written in that language.
+        """
+        return self._gh_http_get(
+            "/repos/{}/{}/languages".format(owner, repo_name)
+        ).json()
+
     def resolve_repo_to_source(self, owner, repo_name):
         """
         Determines the "source" repository of a repository; that is, the

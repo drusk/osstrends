@@ -120,6 +120,28 @@ class GitHubSearcherTest(unittest.TestCase):
         assert_that(owner, equal_to("drusk"))
         assert_that(repo_name, equal_to("algorithms"))
 
+    @httpretty.activate
+    def test_get_repo_language_stats(self):
+        response_data = testutil.read("language_stats_algorithms.json")
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://api.github.com/repos/drusk/algorithms/languages",
+                               responses=[
+                                   httpretty.Response(
+                                       body=response_data,
+                                       status=200
+                                   )
+                               ])
+
+        language_stats = self.searcher.get_repo_language_stats("drusk", "algorithms")
+
+        assert_that(language_stats, equal_to(
+            {
+                "Java": 150390,
+                "Python": 4713
+            }
+        ))
+
 
 if __name__ == '__main__':
     unittest.main()
