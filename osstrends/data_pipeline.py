@@ -20,6 +20,8 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
+import urlparse
+
 import pymongo
 import requests
 
@@ -110,12 +112,12 @@ class GitHubSearcher(object):
                  (see http://developer.github.com/v3/users/)
             A list of users who matched the location.
         """
-        response = self._http_get("{}/search/users".format(self.GH_API_URL_BASE),
-                                  params={
-                                      "q": "location:{}".format(location),
-                                      # use max page size to reduce API calls needed
-                                      "per_page": 100
-                                  }
+        response = self._gh_http_get("/search/users",
+                                     params={
+                                         "q": "location:{}".format(location),
+                                         # use max page size to reduce API calls needed
+                                         "per_page": 100
+                                     }
         )
 
         users = self._parse_users(response)
@@ -127,12 +129,37 @@ class GitHubSearcher(object):
                 # No more pages to read
                 break
 
-            response = self._http_get(next_url)
+            response = self._gh_http_get(next_url)
             users.extend(self._parse_users(response))
 
         return users
 
-    def _http_get(self, url, params=None):
+    def _gh_http_get(self, url, params=None, headers=None):
+        """
+        Performs an HTTP request for the specified GitHub API endpoint.
+
+        Args:
+          url: str
+            Can be either the full URL or just the endpoint being queried.
+            An example of an endpoint would be "/search/users"
+          params: dict
+            Any HTTP get parameters.
+          headers: dict
+            Any HTTP headers.
+
+        Returns:
+          A requests response object.
+        """
+        if not url.startswith(self.GH_API_URL_BASE):
+            url = self.GH_API_URL_BASE + url
+
+        parsed_url = urlparse.urlparse(url)
+
+        if parsed_url.path.startswith("/search"):
+            if headers is None:
+                headers = {}
+            headers.update(self.GH_SEARCH_HEADERS)
+
         return requests.get(url,
                             params=params,
                             headers=self.GH_SEARCH_HEADERS,
