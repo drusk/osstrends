@@ -151,6 +151,36 @@ class GitHubSearcher(object):
 
         return [repo["name"] for repo in response.json()]
 
+    def resolve_repo_to_source(self, owner, repo_name):
+        """
+        Determines the "source" repository of a repository; that is, the
+        top-level parent of a fork.  If the repository is not a fork then
+        it is its own source.
+
+        Args:
+          owner: str
+            The login id for the user who owns the repository being looked
+            up.
+          repo_name: str
+            The repository name, not the full name.  That is, not
+            prepended with "userid/"
+
+        Returns:
+          source_owner: str
+            The owner of the source repository.
+          source_repo_name: str
+            The name of the source repository (should ordinarily be the same
+            as the input repo_name).
+        """
+        response = self._gh_http_get("/repos/{}/{}".format(owner, repo_name))
+        data = response.json()
+
+        try:
+            return data["source"]["full_name"].split("/")
+        except KeyError:
+            # This repo is not a fork, it is its own source
+            return owner, repo_name
+
     def _gh_http_get(self, url, params=None, headers=None):
         """
         Performs an HTTP request for the specified GitHub API endpoint.

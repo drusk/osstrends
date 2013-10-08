@@ -22,7 +22,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 import unittest
 
-from hamcrest import assert_that, has_length, contains_inanyorder
+from hamcrest import assert_that, equal_to, has_length, contains_inanyorder
 import httpretty
 
 from osstrends import data_pipeline
@@ -83,6 +83,42 @@ class GitHubSearcherTest(unittest.TestCase):
             "investment-tracker",
             "drusk-gwt-oracle-example"
         ))
+
+    @httpretty.activate
+    def test_resolve_forked_repo_to_source(self):
+        response_data = testutil.read("repo_is_fork.json")
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://api.github.com/repos/drusk/MOP",
+                               responses=[
+                                   httpretty.Response(
+                                       body=response_data,
+                                       status=200
+                                   )
+                               ])
+
+        owner, repo_name = self.searcher.resolve_repo_to_source("drusk", "MOP")
+
+        assert_that(owner, equal_to("ijiraq"))
+        assert_that(repo_name, equal_to("MOP"))
+
+    @httpretty.activate
+    def test_resolve_source_repo_to_source(self):
+        response_data = testutil.read("repo_is_source.json")
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://api.github.com/repos/drusk/algorithms",
+                               responses=[
+                                   httpretty.Response(
+                                       body=response_data,
+                                       status=200
+                                   )
+                               ])
+
+        owner, repo_name = self.searcher.resolve_repo_to_source("drusk", "algorithms")
+
+        assert_that(owner, equal_to("drusk"))
+        assert_that(repo_name, equal_to("algorithms"))
 
 
 if __name__ == '__main__':
