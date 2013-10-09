@@ -5,7 +5,7 @@
     <script src="{{ url_for("static", filename="Chart.min.js") }}"></script>
     <script src="{{ url_for("static", filename="user_languages.js") }}"></script>
     <script type="text/javascript">
-        $(document).ready(function(){
+        $(document).ready(function () {
             {# Need list filter because reverse returns an iterator. #}
             var stats = {{ language_stats|dictsort(by="value")|reverse|list|tojson }};
             createBarChart("user_languages_chart", stats);
@@ -15,6 +15,11 @@
 
 {% block body %}
 
-    <canvas id="user_languages_chart" width="800" height="400"></canvas>
+    <h1 class="text-center">Languages in <b>{{ userid }}</b>'s public repositories:</h1>
+
+    <div class="container-canvas">
+        <canvas id="user_languages_chart" width="800" height="400"></canvas>
+    </div>
+
 
 {% endblock %}
