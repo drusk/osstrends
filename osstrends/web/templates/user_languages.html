@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block custom_js %}
+    <script src="{{ url_for("static", filename="jquery-1.10.2.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="Chart.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="user_languages.js") }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            {# Safe filter is needed otherwise quotes in the JSON will be escaped. #}
+            var stats = {{ language_stats|safe }};
+            createBarChart("user_languages_chart", stats);
+        })
+    </script>
+{% endblock %}
+
+{% block body %}
+
+    <canvas id="user_languages_chart" width="800" height="400"></canvas>
+
+{% endblock %}

@@ -20,6 +20,8 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
+import json
+
 from flask import Flask, render_template, request
 
 from osstrends import data_pipeline
@@ -40,6 +42,13 @@ def users_by_location():
     location = request.args["location"]
     users = db.get_users_by_location(location.lower())
     return render_template("users.html", location=location, users=users)
+
+
+@app.route("/user/languages/<userid>")
+def user_languages(userid):
+    language_stats = db.get_user_language_stats(userid)
+    return render_template("user_languages.html",
+                           language_stats=json.dumps(language_stats))
 
 
 if __name__ == "__main__":
