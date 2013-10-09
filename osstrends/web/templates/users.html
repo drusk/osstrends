@@ -14,7 +14,7 @@
                 <tbody>
                     {% for user in users %}
                         <tr>
-                            <td><a href="{{ user.html_url }}">{{ user.login }}</a></td>
+                            <td><a href="{{ url_for("user_languages", userid=user.login)}}">{{ user.login }}</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
