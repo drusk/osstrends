@@ -44,9 +44,11 @@ def users_by_location():
 
 @app.route("/user/languages/<userid>")
 def user_languages(userid):
+    user = db.get_user(userid)
     language_stats = db.get_user_language_stats(userid)
     return render_template("user_languages.html",
                            userid=userid,
+                           github_page=user["html_url"],
                            language_stats=language_stats)
 
 
