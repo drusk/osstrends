@@ -50,6 +50,17 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
         retrieved_users = self.db.get_users_by_location(location)
         assert_that(retrieved_users, has_length(649))
 
+    def test_get_user(self):
+        self.db.insert_users_by_location(
+            "victoria",
+            json.loads(testutil.read("victoria_users.json"))
+        )
+
+        user = self.db.get_user("drusk")
+
+        assert_that(user["login"], equal_to("drusk"))
+        assert_that(user["html_url"], equal_to("https://github.com/drusk"))
+
     def test_save_and_retrieve_user_language_stats(self):
         userid = "drusk"
         language_stats = {

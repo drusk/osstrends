@@ -42,14 +42,9 @@ class MongoDatabase(object):
 
     DEFAULT_DB_NAME = "osstrends"
 
-    # Collection storing user locations
-    USERS_LOCATIONS = "users_locations"
+    USERS_COLLECTION = "users"
+    USERID_KEY = "login"
     LOCATION_KEY = "location"
-    USERS_KEY = "users"
-
-    # Collection storing user languages
-    USERS_LANGUAGES = "users_languages"
-    USER_KEY = "user"
     LANGUAGES_KEY = "languages"
 
     def __init__(self, db_name=DEFAULT_DB_NAME, host="localhost", port=27017):
@@ -58,11 +53,23 @@ class MongoDatabase(object):
         )
         self._db = self._client[db_name]
 
-    def _get_collection(self, collection_name):
+    def _get_users_collection(self):
+        return self._db[self.USERS_COLLECTION]
+
+    def get_user(self, userid):
         """
-        Returns a handle to the specified MongoDB database collection.
+        Retrieve user information object for the specified user.
+
+        Args:
+          userid: str
+            The user's login id.
+
+        Returns:
+            user: http://developer.github.com/v3/users/
         """
-        return self._db[collection_name]
+        return self._get_users_collection().find_one(
+            {self.USERID_KEY: userid}
+        )
 
     def get_users_by_location(self, location):
         """
@@ -78,14 +85,7 @@ class MongoDatabase(object):
             (http://developer.github.com/v3/users/).
             Returns an empty list if there are no users for that location.
         """
-        result = self._get_collection(self.USERS_LOCATIONS).find_one(
-            {self.LOCATION_KEY: location}
-        )
-
-        if result is None:
-            return []
-
-        return result[self.USERS_KEY]
+        return list(self._get_users_collection().find({self.LOCATION_KEY: location}))
 
     def insert_users_by_location(self, location, users):
         """
@@ -97,9 +97,11 @@ class MongoDatabase(object):
           users: list(dict)
             A list of user information objects (http://developer.github.com/v3/users/)
         """
-        self._get_collection(self.USERS_LOCATIONS).insert(
-            {self.LOCATION_KEY: location, self.USERS_KEY: users}
-        )
+        users_collection = self._get_users_collection()
+
+        for user in users:
+            user[self.LOCATION_KEY] = location
+            users_collection.insert(user)
 
     def get_user_language_stats(self, userid):
         """
@@ -114,11 +116,7 @@ class MongoDatabase(object):
             Keys are the language names, values are the number of bytes
             written in that language.
         """
-        result = self._get_collection(self.USERS_LANGUAGES).find_one(
-            {self.USER_KEY: userid}
-        )
-
-        return result[self.LANGUAGES_KEY]
+        return self.get_user(userid)[self.LANGUAGES_KEY]
 
     def insert_user_language_stats(self, userid, language_stats):
         """
@@ -133,8 +131,10 @@ class MongoDatabase(object):
 
         Returns: void
         """
-        self._get_collection(self.USERS_LANGUAGES).insert(
-            {self.USER_KEY: userid, self.LANGUAGES_KEY: language_stats}
+        self._get_users_collection().update(
+            {self.USERID_KEY: userid},
+            {"$set": {self.LANGUAGES_KEY: language_stats}},
+            upsert=True
         )
 
 
