@@ -6,8 +6,8 @@
     <script src="{{ url_for("static", filename="user_languages.js") }}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            {# Safe filter is needed otherwise quotes in the JSON will be escaped. #}
-            var stats = {{ language_stats|safe }};
+            {# Need list filter because reverse returns an iterator. #}
+            var stats = {{ language_stats|dictsort(by="value")|reverse|list|tojson }};
             createBarChart("user_languages_chart", stats);
         })
     </script>

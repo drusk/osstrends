@@ -25,17 +25,19 @@
  *
  * @param id The DOM id of the element to draw the chart on.  Should be a
  * canvas element.
- * @param language_stats Object with languages as keys and number of bytes
- * as values.
+ * @param language_stats an array of languages, where each language is an
+ * array of size two with the first element being the language name and
+ * the second value being the number of bytes.
+ * Ex: [["JavaScript", 1667724], ["Python", 1808338]]
  */
 function createBarChart(id, language_stats) {
     var labels = [];
     var data = [];
 
-    for (var language in language_stats) {
-        var count = language_stats[language];
-        labels.push(language);
-        data.push(count);
+    for (var i = 0; i < language_stats.length; i++) {
+        var language_count = language_stats[i];
+        labels.push(language_count[0]);
+        data.push(language_count[1]);
     }
 
     var context = document.getElementById(id).getContext("2d");

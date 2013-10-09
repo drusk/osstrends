@@ -48,7 +48,7 @@ def users_by_location():
 def user_languages(userid):
     language_stats = db.get_user_language_stats(userid)
     return render_template("user_languages.html",
-                           language_stats=json.dumps(language_stats))
+                           language_stats=language_stats)
 
 
 if __name__ == "__main__":
