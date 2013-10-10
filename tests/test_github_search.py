@@ -22,7 +22,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 import unittest
 
-from hamcrest import assert_that, equal_to, has_length, contains_inanyorder
+from hamcrest import assert_that, equal_to, has_length, contains_inanyorder, none
 import httpretty
 from mock import Mock
 
@@ -122,6 +122,23 @@ class GitHubSearcherTest(unittest.TestCase):
                 "Shell": 5407
             }
         ))
+
+    @httpretty.activate
+    def test_search_user(self):
+        self.mock_uri("https://api.github.com/users/drusk",
+                      testutil.read("user_drusk.json"))
+
+        user = self.searcher.search_user("drusk")
+
+        assert_that(user["login"], equal_to("drusk"))
+        assert_that(user["name"], equal_to("David Rusk"))
+        assert_that(user["company"], none())
+        assert_that(user["location"], equal_to("Victoria, BC"))
+        assert_that(user["hireable"], equal_to(False))
+        assert_that(user["hireable"], equal_to(False))
+        assert_that(user["public_repos"], equal_to(16))
+        assert_that(user["followers"], equal_to(1))
+        assert_that(user["following"], equal_to(0))
 
     def mock_uri(self, uri, response_data, status=200):
         httpretty.register_uri(httpretty.GET,

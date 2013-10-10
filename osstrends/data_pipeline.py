@@ -146,6 +146,19 @@ class GitHubSearcher(object):
     GH_API_URL_BASE = "https://api.github.com"
     GH_SEARCH_HEADERS = {"Accept": "application/vnd.github.preview"}
 
+    def search_user(self, userid):
+        """
+        Retrieve the GitHub user object for the user with the specified userid.
+
+        Args:
+          userid: str
+            The user's login id.
+
+        Returns:
+          user: User object described at http://developer.github.com/v3/users/
+        """
+        return self._gh_http_get("/users/{}".format(userid)).json()
+
     def search_users_by_location(self, location):
         """
         Search for GitHub users who list their location.
@@ -155,9 +168,9 @@ class GitHubSearcher(object):
             The location value to look for.
 
         Returns:
-          users: list of JSON objects with user data
-                 (see http://developer.github.com/v3/users/)
-            A list of users who matched the location.
+          users: list of JSON objects with data for users who matched the
+          location.  Note that this does NOT contain all the user
+          information available with a direct user lookup.
         """
         response = self._gh_http_get("/search/users",
                                      params={
