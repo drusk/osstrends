@@ -73,6 +73,33 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
         assert_that(self.db.get_user_language_stats(userid),
                     equal_to(language_stats))
 
+    def test_save_and_retrieve_user_who_was_not_already_in_database(self):
+        user = json.loads(testutil.read("user_drusk.json"))
+
+        self.db.insert_user(user)
+
+        retrieved_user = self.db.get_user("drusk")
+        assert_that(retrieved_user["login"], equal_to("drusk"))
+        assert_that(retrieved_user["name"], equal_to("David Rusk"))
+        assert_that(retrieved_user["public_repos"], equal_to(16))
+
+    def test_save_and_retrieve_user_already_in_database(self):
+        userid = "drusk"
+        language_stats = {
+            "Python": 12345,
+            "Java": 6789
+        }
+
+        self.db.insert_user_language_stats(userid, language_stats)
+
+        user = json.loads(testutil.read("user_drusk.json"))
+
+        self.db.insert_user(user)
+
+        # Make sure language data is still there
+        assert_that(self.db.get_user_language_stats(userid),
+                    equal_to(language_stats))
+
 
 if __name__ == '__main__':
     unittest.main()

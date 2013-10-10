@@ -71,6 +71,23 @@ class MongoDatabase(object):
             {self.USERID_KEY: userid}
         )
 
+    def insert_user(self, user):
+        """
+        Adds a user to the database, or updates the existing entry with
+        updated or new fields.
+
+        Args:
+          user: dict-like
+            Contains the user data.
+
+        Returns: void
+        """
+        self._get_users_collection().update(
+            {self.USERID_KEY: user[self.USERID_KEY]},
+            {"$set": user},
+            upsert=True
+        )
+
     def get_users_by_location(self, location):
         """
         Lookup users by location from the database.
@@ -96,6 +113,8 @@ class MongoDatabase(object):
             The location which the users are from.
           users: list(dict)
             A list of user information objects (http://developer.github.com/v3/users/)
+
+        Returns: void
         """
         users_collection = self._get_users_collection()
 
