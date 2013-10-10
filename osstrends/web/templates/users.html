@@ -8,13 +8,23 @@
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr>
+                        <th>Name</th>
                         <th>GitHub Username</th>
+                        <th>Company</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
                         <tr>
+                            <td>{{ user.name }}</td>
                             <td><a href="{{ url_for("user_languages", userid=user.login)}}">{{ user.login }}</a></td>
+                            <td>
+                                {% if user.company is none %}
+                                    <!-- Intentionally blank -->
+                                {% else %}
+                                    {{ user.company }}
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
