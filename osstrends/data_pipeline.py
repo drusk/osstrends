@@ -375,6 +375,12 @@ class DataPipeline(object):
             for user in users:
                 userid = user["login"]
 
+                # Get more details about user
+                full_user_details = self.searcher.search_user(userid)
+                self.db.insert_user(full_user_details)
+
+                logger.info("Retrieved user info for {}".format(userid))
+
                 logger.info(
                     "Starting collection of language stats for user: {}".format(
                         userid))

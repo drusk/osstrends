@@ -53,7 +53,7 @@ class DataPipelineTest(unittest.TestCase):
         location2_user1_stats = {"C#": 9, "Shell": 2}
 
         # Mock user-location search
-        def get_users(location):
+        def get_users_by_location(location):
             lookup = {
                 location1: [location1_user1,
                             location1_user2],
@@ -64,7 +64,21 @@ class DataPipelineTest(unittest.TestCase):
             except KeyError:
                 raise ValueError("Invalid location: %s" % location)
 
-        self.searcher.search_users_by_location = Mock(side_effect=get_users)
+        self.searcher.search_users_by_location = Mock(side_effect=get_users_by_location)
+
+        # Mock user search.  In reality additional information is returned.
+        def get_user(userid):
+            lookup = {
+                location1_user1_login: location1_user1,
+                location1_user2_login: location1_user2,
+                location2_user1_login: location2_user1
+            }
+            try:
+                return lookup[userid]
+            except KeyError:
+                raise ValueError("Invalid user: %s" % userid)
+
+        self.searcher.search_user = Mock(side_effect=get_user)
 
         # Mock user-language searches
         def get_language_stats(user):
@@ -97,6 +111,20 @@ class DataPipelineTest(unittest.TestCase):
                         call(location2, [location2_user1])
                     )
         )
+
+        assert_that(self.searcher.search_user.call_args_list,
+                    contains(
+                        call(location1_user1_login),
+                        call(location1_user2_login),
+                        call(location2_user1_login)
+                    ))
+
+        assert_that(self.db.insert_user.call_args_list,
+                    contains(
+                        call(location1_user1),
+                        call(location1_user2),
+                        call(location2_user1)
+                    ))
 
         assert_that(self.searcher.get_user_language_stats.call_args_list,
                     contains(
