@@ -44,7 +44,7 @@ class MongoDatabase(object):
 
     USERS_COLLECTION = "users"
     USERID_KEY = "login"
-    LOCATION_KEY = "location"
+    NORMALIZED_LOCATION_KEY = "location_normalized"
     LANGUAGES_KEY = "languages"
 
     def __init__(self, db_name=DEFAULT_DB_NAME, host="localhost", port=27017):
@@ -102,7 +102,9 @@ class MongoDatabase(object):
             (http://developer.github.com/v3/users/).
             Returns an empty list if there are no users for that location.
         """
-        return list(self._get_users_collection().find({self.LOCATION_KEY: location}))
+        return list(self._get_users_collection().find(
+            {self.NORMALIZED_LOCATION_KEY: location})
+        )
 
     def insert_users_by_location(self, location, users):
         """
@@ -119,7 +121,7 @@ class MongoDatabase(object):
         users_collection = self._get_users_collection()
 
         for user in users:
-            user[self.LOCATION_KEY] = location
+            user[self.NORMALIZED_LOCATION_KEY] = location
             users_collection.insert(user)
 
     def get_user_language_stats(self, userid):
