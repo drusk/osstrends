@@ -56,6 +56,9 @@ class MongoDatabase(object):
     def _get_users_collection(self):
         return self._db[self.USERS_COLLECTION]
 
+    def delete_users(self):
+        self._get_users_collection().drop()
+
     def get_user(self, userid):
         """
         Retrieve user information object for the specified user.
@@ -365,6 +368,9 @@ class DataPipeline(object):
         """
         Runs the pipeline.
         """
+        # Remove the old data
+        self.db.delete_users()
+
         for location in self.locations:
             logger.info("Starting to process location: {}".format(location))
 
