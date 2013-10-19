@@ -1,2 +1,3 @@
 recursive-include osstrends/web/templates *
 recursive-include osstrends/web/static *
+include requirements.txt

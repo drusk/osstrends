@@ -39,8 +39,9 @@ def parse_requirements():
 
 
 setup(
-    name="OSSTrends",
+    name="osstrends",
     author="David Rusk",
+    author_email="drusk@uvic.ca",
     version="0.1",
     long_description=("Open Source Software development activity by "
                       "geographical location."),
