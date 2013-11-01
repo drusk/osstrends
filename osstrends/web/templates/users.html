@@ -1,32 +1,50 @@
 {% extends "location_selection.html" %}
 
+{% block custom_css %}
+    <link rel="stylesheet"
+          href="{{ url_for("static", filename="vendor/datatables-bootstrap3/assets/css/datatables.css") }}">
+{% endblock %}
+
+{% block custom_js %}
+    <script src="{{ url_for("static", filename="vendor/jquery-1.10.2.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="vendor/jquery.dataTables.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="vendor/datatables-bootstrap3/assets/js/datatables.js") }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#user_table").dataTable({
+                "sPaginationType": "bs_four_button"
+            });
+        })
+    </script>
+{% endblock %}
+
 {% block results %}
     <h2 class="page-header" align="center">Users in {{ location }}:</h2>
 
     <div class="container">
         <div class="col-lg-offset-2 col-lg-8">
-            <table class="table table-striped table-bordered">
+            <table class="table table-striped table-bordered" id="user_table">
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>GitHub Username</th>
-                        <th>Company</th>
-                    </tr>
+                <tr>
+                    <th>Name</th>
+                    <th>GitHub Username</th>
+                    <th>Company</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for user in users %}
-                        <tr>
-                            <td>{{ user.name }}</td>
-                            <td><a href="{{ url_for("user_languages", userid=user.login)}}">{{ user.login }}</a></td>
-                            <td>
-                                {% if user.company is none %}
-                                    <!-- Intentionally blank -->
-                                {% else %}
-                                    {{ user.company }}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td><a href="{{ url_for("user_languages", userid=user.login) }}">{{ user.login }}</a></td>
+                        <td>
+                            {% if user.company is none %}
+                                <!-- Intentionally blank -->
+                            {% else %}
+                                {{ user.company }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>

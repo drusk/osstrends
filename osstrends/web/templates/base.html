@@ -9,6 +9,7 @@
 
         <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="custom.css") }}">
 
+        {% block custom_css %}{% endblock %}
         {% block custom_js %}{% endblock %}
     </head>
     <body>

@@ -9,7 +9,7 @@
             {# Need list filter because reverse returns an iterator. #}
             var stats = {{ language_stats|dictsort(by="value")|reverse|list|tojson }};
             createBarChart("user_languages_chart", stats);
-        })
+        });
     </script>
 {% endblock %}
 
