@@ -40,9 +40,7 @@
                         <td>{{ user.name }}</td>
                         <td><a href="{{ url_for("user_languages", userid=user.login) }}">{{ user.login }}</a></td>
                         <td>
-                            {% if user.company is none %}
-                                <!-- Intentionally blank -->
-                            {% else %}
+                            {% if user.company is not none %}
                                 {{ user.company }}
                             {% endif %}
                         </td>
