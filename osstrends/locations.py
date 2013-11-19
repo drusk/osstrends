@@ -21,6 +21,14 @@
 __author__ = "David Rusk <drusk@uvic.ca>"
 
 import json
+import os
+
+
+def path(filename):
+    """
+    Performs path resolution to the data file.
+    """
+    return os.path.join(os.path.dirname(__file__), filename)
 
 
 class Location(object):
@@ -36,7 +44,7 @@ class Location(object):
 def load_locations(filename="locations.json"):
     locations = []
 
-    with open(filename, "rb") as filehandle:
+    with open(path(filename), "rb") as filehandle:
         for json_object in json.load(filehandle):
             if json_object["include"]:
                 locations.append(
