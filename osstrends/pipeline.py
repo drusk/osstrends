@@ -85,6 +85,12 @@ class DataPipeline(object):
         userid = user["login"]
 
         full_user_details = self.searcher.search_user(userid)
+
+        if full_user_details["location"] not in location.valid_variations:
+            # This is needed because searching for "Victoria" will return users from
+            # Victoria BC, but also from Victoria the Australian state.
+            return
+
         self.db.insert_user(full_user_details, location.normalized)
 
         logger.info("Retrieved user info for {}".format(userid))

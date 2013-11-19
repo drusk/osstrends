@@ -208,32 +208,3 @@ class GitHubSearcher(object):
                             params=params,
                             headers=self.GH_SEARCH_HEADERS,
                             auth=(auth.GH_AUTH_USERNAME, auth.GH_AUTH_TOKEN))
-
-
-class UserLocationFilter(object):
-    """
-    Used to filter down users retrieved from the GitHub API.
-
-    This is needed because searching for "Victoria" will return users from
-    Victoria BC, but also from Victoria the Australian state.
-
-    We do this is a post-processing step rather than making the search
-    term more specific in order to cut down on API calls.  For example,
-    we could search for "Victoria, BC", but then we would miss
-    "Victoria, British Columbia", "Victoria, Canada", etc., and would need
-    an API call for each.
-    """
-
-    def __init__(self, valid_variations):
-        """
-        Args:
-          valid_variations: list(str)
-            Keep users whose location matches one of these valid variations
-            of the location.
-            Ex: ["Victoria, BC", "Victoria, B.C.", "Victoria, Canada"]
-        """
-        self.valid_variations = valid_variations
-
-    def filter(self, users):
-        return [user for user in users
-                if user["location"] in self.valid_variations]

@@ -26,7 +26,7 @@ from hamcrest import assert_that, equal_to, has_length, contains_inanyorder, non
 import httpretty
 from mock import Mock
 
-from osstrends.github import GitHubSearcher, UserLocationFilter
+from osstrends.github import GitHubSearcher
 from tests import testutil
 
 
@@ -149,24 +149,6 @@ class GitHubSearcherTest(unittest.TestCase):
                                        status=status
                                    )
                                ])
-
-
-class UserLocationFilterTest(unittest.TestCase):
-    def setUp(self):
-        self.filter = UserLocationFilter(
-            ["Victoria, BC", "Victoria, B.C.", "Victoria, Canada",
-             "Victoria, BC, Canada"])
-
-    def create_user(self, login, location):
-        return {"login": login, "location": location}
-
-    def test_filter_for_victoria_bc(self):
-        user1 = self.create_user("David", "Victoria, BC")
-        user2 = self.create_user("Adam", "Melbourne, Victoria, Australia")
-        user3 = self.create_user("Alex", "Victoria, BC, Canada")
-
-        assert_that(self.filter.filter([user1, user2, user3]),
-                    contains_inanyorder(user1, user3))
 
 
 if __name__ == '__main__':

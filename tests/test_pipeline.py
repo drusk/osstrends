@@ -27,7 +27,7 @@ from mock import Mock, MagicMock, call
 
 from osstrends.database import MongoDatabase
 from osstrends.github import GitHubSearcher
-from osstrends.locations import load_locations
+from osstrends.locations import Location, load_locations
 from osstrends.pipeline import DataPipeline
 import testutil
 
@@ -67,7 +67,7 @@ class DataPipelineTest(unittest.TestCase):
         assert_that(self.pipeline.process_user.call_count, equal_to(num_users))
 
     def test_process_user(self):
-        full_user_details = Mock()
+        full_user_details = {"location": "Victoria, BC"}
         language_stats = Mock()
         self.searcher.search_user.return_value = full_user_details
         self.searcher.get_user_language_stats.return_value = language_stats
@@ -84,6 +84,37 @@ class DataPipelineTest(unittest.TestCase):
         self.searcher.get_user_language_stats.assert_called_once_with("drusk")
         self.db.insert_user_language_stats.assert_called_once_with(
             "drusk", language_stats)
+
+    def test_user_filtered_due_to_wrong_location(self):
+        location = Location("Victoria, BC, Canada",
+                            ["Victoria, BC", "Victoria, BC, Canada"],
+                            "victoria")
+
+        def get_full_details(userid):
+            full_details = {"login": userid}
+
+            if userid == "Bob":
+                full_details["location"] = "Victoria, Australia"
+            elif userid == "drusk":
+                full_details["location"] = "Victoria, BC"
+            else:
+                raise ValueError("Unknown userid: %s" % userid)
+
+            return full_details
+
+        self.searcher.search_user = Mock(side_effect=get_full_details)
+
+        user1 = {"login": "Bob"}
+        self.pipeline.process_user(user1, location)
+
+        self.searcher.search_user.assert_called_once_with("Bob")
+        assert_that(self.db.insert_user.called, equal_to(False))
+
+        user2 = {"login": "drusk"}
+        self.pipeline.process_user(user2, location)
+
+        assert_that(self.searcher.search_user.call_count, equal_to(2))
+        assert_that(self.db.insert_user.call_count, equal_to(1))
 
 
 if __name__ == '__main__':
