@@ -24,11 +24,9 @@ import logging
 
 from osstrends.database import MongoDatabase
 from osstrends.github import GitHubSearcher
+from osstrends.locations import load_locations
 
 logger = logging.getLogger(__name__)
-
-# The locations to lookup users from
-LOCATIONS = ["victoria", "vancouver"]
 
 
 class DataPipeline(object):
@@ -59,37 +57,52 @@ class DataPipeline(object):
         self.db.delete_users()
 
         for location in self.locations:
-            logger.info("Starting to process location: {}".format(location))
+            self.process_location(location)
 
-            users = self.searcher.search_users_by_location(location)
-            self.db.insert_users_by_location(location, users)
+    def process_location(self, location):
+        """
+        Searches for users in a location and then processes them.
 
-            logger.info("Got users for location: {}".format(
-                location))
+        Args:
+          location: osstrends.locations.Location
+        """
+        logger.info("Starting to process location: {}".format(location))
 
-            for user in users:
-                userid = user["login"]
+        users = self.searcher.search_users_by_location(location.search_term)
 
-                # Get more details about user
-                full_user_details = self.searcher.search_user(userid)
-                self.db.insert_user(full_user_details)
+        logger.info("Got users for location: {}".format(
+            location.search_term))
 
-                logger.info("Retrieved user info for {}".format(userid))
+        for user in users:
+            self.process_user(user)
 
-                logger.info(
-                    "Starting collection of language stats for user: {}".format(
-                        userid))
+    def process_user(self, user):
+        """
+        The location-based search does not return very much information
+        about the user.  This method gets the full details about the user
+        and saves them to the database.
+        """
+        userid = user["login"]
 
-                language_stats = self.searcher.get_user_language_stats(userid)
-                self.db.insert_user_language_stats(userid, language_stats)
+        full_user_details = self.searcher.search_user(userid)
+        self.db.insert_user(full_user_details)
 
-                logger.info(
-                    "Finished collecting language stats for user: {}".format(
-                        userid))
+        logger.info("Retrieved user info for {}".format(userid))
+
+        logger.info(
+            "Starting collection of language stats for user: {}".format(
+                userid))
+
+        language_stats = self.searcher.get_user_language_stats(userid)
+        self.db.insert_user_language_stats(userid, language_stats)
+
+        logger.info(
+            "Finished collecting language stats for user: {}".format(
+                userid))
 
 
 def execute():
     """
     Executes the data pipeline with default parameters.
     """
-    DataPipeline(MongoDatabase(), GitHubSearcher(), LOCATIONS).execute()
+    DataPipeline(MongoDatabase(), GitHubSearcher(), load_locations()).execute()

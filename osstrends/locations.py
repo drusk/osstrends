@@ -29,6 +29,9 @@ class Location(object):
         self.valid_variations = valid_variations
         self.search_term = search_term
 
+    def __repr__(self):
+        return self.normalized
+
 
 def load_locations(filename="locations.json"):
     locations = []

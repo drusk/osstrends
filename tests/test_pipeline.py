@@ -22,125 +22,66 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 import unittest
 
-from hamcrest import assert_that, contains
-from mock import Mock, call
+from hamcrest import assert_that, contains, equal_to
+from mock import Mock, MagicMock, call
 
 from osstrends.database import MongoDatabase
 from osstrends.github import GitHubSearcher
+from osstrends.locations import load_locations
 from osstrends.pipeline import DataPipeline
+import testutil
 
 
 class DataPipelineTest(unittest.TestCase):
     def setUp(self):
         self.db = Mock(spec=MongoDatabase)
         self.searcher = Mock(spec=GitHubSearcher)
+        self.locations = load_locations(testutil.path("test_locations.json"))
+
+        self.pipeline = DataPipeline(self.db, self.searcher, self.locations)
 
     def test_execute_pipeline(self):
-        location1 = "victoria"
-        location2 = "vancouver"
+        self.pipeline.process_location = Mock()
 
-        def create_user(login):
-            return {"login": login}
+        self.pipeline.execute()
 
-        location1_user1_login = "drusk"
-        location1_user1 = create_user(location1_user1_login)
-        location1_user1_stats = {"Python": 10, "Java": 5}
+        self.db.delete_users.assert_called_once_with()
 
-        location1_user2_login = "rrusk"
-        location1_user2 = create_user(location1_user2_login)
-        location1_user2_stats = {"C": 15, "Java": 8}
+        assert_that(self.pipeline.process_location.call_args_list,
+                    contains(*[call(location) for location in self.locations]))
 
-        location2_user1_login = "brian"
-        location2_user1 = create_user(location2_user1_login)
-        location2_user1_stats = {"C#": 9, "Shell": 2}
+    def test_process_location(self):
+        self.pipeline.process_user = Mock()
 
-        # Mock user-location search
-        def get_users_by_location(location):
-            lookup = {
-                location1: [location1_user1,
-                            location1_user2],
-                location2: [location2_user1]
-            }
-            try:
-                return lookup[location]
-            except KeyError:
-                raise ValueError("Invalid location: %s" % location)
+        num_users = 10
+        users = [MagicMock() for _ in xrange(num_users)]
+        self.searcher.search_users_by_location.return_value = users
 
-        self.searcher.search_users_by_location = Mock(side_effect=get_users_by_location)
+        location = self.locations[0]
+        self.pipeline.process_location(location)
 
-        # Mock user search.  In reality additional information is returned.
-        def get_user(userid):
-            lookup = {
-                location1_user1_login: location1_user1,
-                location1_user2_login: location1_user2,
-                location2_user1_login: location2_user1
-            }
-            try:
-                return lookup[userid]
-            except KeyError:
-                raise ValueError("Invalid user: %s" % userid)
-
-        self.searcher.search_user = Mock(side_effect=get_user)
-
-        # Mock user-language searches
-        def get_language_stats(user):
-            lookup = {
-                location1_user1_login: location1_user1_stats,
-                location1_user2_login: location1_user2_stats,
-                location2_user1_login: location2_user1_stats
-            }
-            try:
-                return lookup[user]
-            except KeyError:
-                raise ValueError("Invalid user: %s" % user)
-
-        self.searcher.get_user_language_stats = Mock(side_effect=get_language_stats)
-
-        pipeline = DataPipeline(self.db, self.searcher, [location1, location2])
-        pipeline.execute()
-
-        assert_that(self.searcher.search_users_by_location.call_args_list,
-                    contains(
-                        call(location1),
-                        call(location2)
-                    )
+        self.searcher.search_users_by_location.assert_called_once_with(
+            location.search_term
         )
 
-        assert_that(self.db.insert_users_by_location.call_args_list,
-                    contains(
-                        call(location1, [location1_user1, location1_user2]),
-                        call(location2, [location2_user1])
-                    )
-        )
+        assert_that(self.pipeline.process_user.call_count, equal_to(num_users))
 
-        assert_that(self.searcher.search_user.call_args_list,
-                    contains(
-                        call(location1_user1_login),
-                        call(location1_user2_login),
-                        call(location2_user1_login)
-                    ))
+    def test_process_user(self):
+        full_user_details = Mock()
+        language_stats = Mock()
+        self.searcher.search_user.return_value = full_user_details
+        self.searcher.get_user_language_stats.return_value = language_stats
 
-        assert_that(self.db.insert_user.call_args_list,
-                    contains(
-                        call(location1_user1),
-                        call(location1_user2),
-                        call(location2_user1)
-                    ))
+        user = {"login": "drusk"}
 
-        assert_that(self.searcher.get_user_language_stats.call_args_list,
-                    contains(
-                        call(location1_user1_login),
-                        call(location1_user2_login),
-                        call(location2_user1_login)
-                    )
-        )
+        self.pipeline.process_user(user)
 
-        assert_that(self.db.insert_user_language_stats.call_args_list,
-                    contains(
-                        call(location1_user1_login, location1_user1_stats),
-                        call(location1_user2_login, location1_user2_stats),
-                        call(location2_user1_login, location2_user1_stats)
-                    ))
+        self.searcher.search_user.assert_called_once_with("drusk")
+        self.db.insert_user.assert_called_once_with(full_user_details)
+
+        self.searcher.get_user_language_stats.assert_called_once_with("drusk")
+        self.db.insert_user_language_stats.assert_called_once_with(
+            "drusk", language_stats)
 
 
 if __name__ == '__main__':
