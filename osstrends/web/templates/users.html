@@ -1,4 +1,4 @@
-{% extends "location_selection.html" %}
+{% extends "base.html" %}
 
 {% block custom_css %}
     <link rel="stylesheet"
@@ -21,8 +21,8 @@
     </script>
 {% endblock %}
 
-{% block results %}
-    <h2 class="page-header" align="center">Developers in {{ location|title }}:</h2>
+{% block body %}
+    <h2 class="page-header" align="center">Developers in {{ location }}:</h2>
 
     <div class="container">
         <div class="col-lg-offset-2 col-lg-8">

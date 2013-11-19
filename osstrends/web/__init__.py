@@ -23,16 +23,18 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 from flask import Flask, render_template, request
 
 from osstrends.database import MongoDatabase
+from osstrends.locations import load_locations
 
 
 app = Flask(__name__)
 
 db = MongoDatabase()
+locations = load_locations()
 
 
 @app.route("/")
 def location_selection():
-    return render_template("location_selection.html")
+    return render_template("location_selection.html", locations=locations)
 
 
 @app.route("/users")

@@ -1,8 +1,25 @@
 {% extends "base.html" %}
 
+{% block custom_css %}
+    <link rel="stylesheet"
+          href="{{ url_for("static", filename="vendor/select2/select2.css") }}">
+{% endblock %}
+
+{% block custom_js %}
+    <script src="{{ url_for("static", filename="vendor/jquery-1.10.2.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="vendor/select2/select2.min.js") }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#location").select2({
+                placeholder: "Enter location"
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block body %}
     <div class="container">
-        <h1 align="center">Find Github Users Who List Their Geographic Location</h1>
+        <h1 align="center">Find GitHub Users Who List Their Geographic Location</h1>
     </div>
 
     <form action="{{ url_for("users_by_location") }}" class="form-horizontal col-lg-offset-2" role="form">
@@ -10,7 +27,11 @@
             <label for="location" class="col-lg-2 control-label">Location</label>
 
             <div class="col-lg-6">
-                <input type="text" class="form-control" name="location" id="location" placeholder="Enter location">
+                <select id="location" name="location" style="width:100%">
+                    {% for location in locations %}
+                        <option value="{{ location }}">{{ location }}</option>
+                    {%  endfor %}
+                </select>
             </div>
         </div>
         <div class="form-group">
@@ -19,7 +40,5 @@
             </div>
         </div>
     </form>
-
-    {% block results %}{% endblock %}
 
 {% endblock %}
