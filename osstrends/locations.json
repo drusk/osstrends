@@ -1,0 +1,30 @@
+[
+    {
+        "normalized": "Victoria, BC, Canada",
+        "valid_variations": [
+            "Victoria, BC",
+            "Victoria, B.C.",
+            "Victoria, Canada",
+            "Victoria, BC, Canada",
+            "Victoria, B.C., Canada",
+            "Victoria, British Columbia",
+            "Victoria, British Columbia, Canada"
+        ],
+        "search_term": "victoria",
+        "include": true
+    },
+    {
+        "normalized": "Vancouver, BC, Canada",
+        "valid_variations": [
+            "Vancouver, BC",
+            "Vancouver, B.C.",
+            "Vancouver, Canada",
+            "Vancouver, BC, Canada",
+            "Vancouver, B.C., Canada",
+            "Vancouver, British Columbia",
+            "Vancouver, British Columbia, Canada"
+        ],
+        "search_term": "vancouver",
+        "include": false
+    }
+]

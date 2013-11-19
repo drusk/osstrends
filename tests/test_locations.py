@@ -20,24 +20,33 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
-import os
+import unittest
 
-DATA_FOLDER = "data"
+from hamcrest import assert_that, has_length, equal_to, contains_inanyorder
 
-
-def path(filename):
-    """
-    Performs path resolution to the test data file.
-    """
-    return os.path.join(os.path.dirname(__file__), DATA_FOLDER, filename)
+from osstrends.locations import load_locations
+import testutil
 
 
-def read(filename):
-    """
-    Handles path resolution and reads the contents of a test data file.
+class LocationTest(unittest.TestCase):
+    def test_load_locations(self):
+        locations = load_locations(testutil.path("test_locations.json"))
 
-    Returns:
-      file_contents: str
-    """
-    with open(path(filename), "rb") as filehandle:
-        return filehandle.read()
+        assert_that(locations, has_length(2))
+        location1 = locations[0]
+        location2 = locations[1]
+
+        assert_that(location1.normalized, equal_to("Victoria, BC, Canada"))
+        assert_that(location1.valid_variations,
+                    contains_inanyorder(
+                        "Victoria, BC",
+                        "Victoria, Canada",
+                        "Victoria, BC, Canada"
+                    ))
+        assert_that(location1.search_term, equal_to("victoria"))
+
+        assert_that(location2.normalized, equal_to("Seattle, WA, USA"))
+
+
+if __name__ == '__main__':
+    unittest.main()

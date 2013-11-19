@@ -20,24 +20,22 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
-import os
-
-DATA_FOLDER = "data"
+import json
 
 
-def path(filename):
-    """
-    Performs path resolution to the test data file.
-    """
-    return os.path.join(os.path.dirname(__file__), DATA_FOLDER, filename)
+class Location(object):
+    def __init__(self, json_data):
+        self.normalized = json_data["normalized"]
+        self.valid_variations = json_data["valid_variations"]
+        self.search_term = json_data["search_term"]
 
 
-def read(filename):
-    """
-    Handles path resolution and reads the contents of a test data file.
+def load_locations(filename="locations.json"):
+    locations = []
 
-    Returns:
-      file_contents: str
-    """
-    with open(path(filename), "rb") as filehandle:
-        return filehandle.read()
+    with open(filename, "rb") as filehandle:
+        for json_object in json.load(filehandle):
+            if json_object["include"]:
+                locations.append(Location(json_object))
+
+    return locations
