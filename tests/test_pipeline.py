@@ -25,13 +25,15 @@ import unittest
 from hamcrest import assert_that, contains
 from mock import Mock, call
 
-from osstrends import data_pipeline
+from osstrends.database import MongoDatabase
+from osstrends.github import GitHubSearcher
+from osstrends.pipeline import DataPipeline
 
 
 class DataPipelineTest(unittest.TestCase):
     def setUp(self):
-        self.db = Mock(spec=data_pipeline.MongoDatabase)
-        self.searcher = Mock(spec=data_pipeline.GitHubSearcher)
+        self.db = Mock(spec=MongoDatabase)
+        self.searcher = Mock(spec=GitHubSearcher)
 
     def test_execute_pipeline(self):
         location1 = "victoria"
@@ -94,8 +96,7 @@ class DataPipelineTest(unittest.TestCase):
 
         self.searcher.get_user_language_stats = Mock(side_effect=get_language_stats)
 
-        pipeline = data_pipeline.DataPipeline(self.db, self.searcher,
-                                              [location1, location2])
+        pipeline = DataPipeline(self.db, self.searcher, [location1, location2])
         pipeline.execute()
 
         assert_that(self.searcher.search_users_by_location.call_args_list,

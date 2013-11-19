@@ -26,7 +26,7 @@ import unittest
 from hamcrest import assert_that, equal_to, has_length
 import pymongo
 
-from osstrends import data_pipeline
+from osstrends.database import MongoDatabase
 from tests import testutil
 
 TEST_DB_NAME = "test-osstrends"
@@ -36,7 +36,7 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
     def setUp(self):
         pymongo.MongoClient().drop_database(TEST_DB_NAME)
 
-        self.db = data_pipeline.MongoDatabase(db_name=TEST_DB_NAME)
+        self.db = MongoDatabase(db_name=TEST_DB_NAME)
 
     def test_save_and_retrieve_users_by_location(self):
         location = "victoria"

@@ -22,9 +22,9 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 import logging
 
-from osstrends import data_pipeline
+from osstrends import pipeline
 
 logging.basicConfig(filename="datapipeline.log", level=logging.DEBUG)
 
 if __name__ == "__main__":
-    data_pipeline.execute()
+    pipeline.execute()

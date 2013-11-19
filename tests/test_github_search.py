@@ -26,13 +26,13 @@ from hamcrest import assert_that, equal_to, has_length, contains_inanyorder, non
 import httpretty
 from mock import Mock
 
-from osstrends import data_pipeline
+from osstrends.github import GitHubSearcher
 from tests import testutil
 
 
 class GitHubSearcherTest(unittest.TestCase):
     def setUp(self):
-        self.searcher = data_pipeline.GitHubSearcher()
+        self.searcher = GitHubSearcher()
 
     @httpretty.activate
     def test_search_users_by_location_in_single_call(self):

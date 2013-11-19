@@ -22,12 +22,12 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 from flask import Flask, render_template, request
 
-from osstrends import data_pipeline
+from osstrends.database import MongoDatabase
 
 
 app = Flask(__name__)
 
-db = data_pipeline.MongoDatabase()
+db = MongoDatabase()
 
 
 @app.route("/")
