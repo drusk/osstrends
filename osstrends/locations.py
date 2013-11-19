@@ -24,10 +24,10 @@ import json
 
 
 class Location(object):
-    def __init__(self, json_data):
-        self.normalized = json_data["normalized"]
-        self.valid_variations = json_data["valid_variations"]
-        self.search_term = json_data["search_term"]
+    def __init__(self, normalized, valid_variations, search_term):
+        self.normalized = normalized
+        self.valid_variations = valid_variations
+        self.search_term = search_term
 
 
 def load_locations(filename="locations.json"):
@@ -36,6 +36,12 @@ def load_locations(filename="locations.json"):
     with open(filename, "rb") as filehandle:
         for json_object in json.load(filehandle):
             if json_object["include"]:
-                locations.append(Location(json_object))
+                locations.append(
+                    Location(
+                        json_object["normalized"],
+                        json_object["valid_variations"],
+                        json_object["search_term"]
+                    )
+                )
 
     return locations
