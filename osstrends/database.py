@@ -62,7 +62,7 @@ class MongoDatabase(object):
             {self.USERID_KEY: userid}
         )
 
-    def insert_user(self, user):
+    def insert_user(self, user, normalized_location):
         """
         Adds a user to the database, or updates the existing entry with
         updated or new fields.
@@ -70,9 +70,14 @@ class MongoDatabase(object):
         Args:
           user: dict-like
             Contains the user data.
+          normalized_location: str
+            Normalized version of the user's location which will be used
+            in database lookups.
 
         Returns: void
         """
+        user[self.NORMALIZED_LOCATION_KEY] = normalized_location
+
         self._get_users_collection().update(
             {self.USERID_KEY: user[self.USERID_KEY]},
             {"$set": user},
@@ -96,24 +101,6 @@ class MongoDatabase(object):
         return list(self._get_users_collection().find(
             {self.NORMALIZED_LOCATION_KEY: location})
         )
-
-    def insert_users_by_location(self, location, users):
-        """
-        Associate a collection of users with a location in the database.
-
-        Args:
-          location: str
-            The location which the users are from.
-          users: list(dict)
-            A list of user information objects (http://developer.github.com/v3/users/)
-
-        Returns: void
-        """
-        users_collection = self._get_users_collection()
-
-        for user in users:
-            user[self.NORMALIZED_LOCATION_KEY] = location
-            users_collection.insert(user)
 
     def get_user_language_stats(self, userid):
         """

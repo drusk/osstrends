@@ -74,9 +74,9 @@ class DataPipeline(object):
             location.search_term))
 
         for user in users:
-            self.process_user(user)
+            self.process_user(user, location)
 
-    def process_user(self, user):
+    def process_user(self, user, location):
         """
         The location-based search does not return very much information
         about the user.  This method gets the full details about the user
@@ -85,7 +85,7 @@ class DataPipeline(object):
         userid = user["login"]
 
         full_user_details = self.searcher.search_user(userid)
-        self.db.insert_user(full_user_details)
+        self.db.insert_user(full_user_details, location.normalized)
 
         logger.info("Retrieved user info for {}".format(userid))
 

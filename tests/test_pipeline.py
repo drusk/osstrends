@@ -73,11 +73,13 @@ class DataPipelineTest(unittest.TestCase):
         self.searcher.get_user_language_stats.return_value = language_stats
 
         user = {"login": "drusk"}
+        location = self.locations[0]
 
-        self.pipeline.process_user(user)
+        self.pipeline.process_user(user, location)
 
         self.searcher.search_user.assert_called_once_with("drusk")
-        self.db.insert_user.assert_called_once_with(full_user_details)
+        self.db.insert_user.assert_called_once_with(full_user_details,
+                                                    location.normalized)
 
         self.searcher.get_user_language_stats.assert_called_once_with("drusk")
         self.db.insert_user_language_stats.assert_called_once_with(

@@ -46,15 +46,18 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
         users = json.loads(testutil.read("victoria_users.json"))
         assert_that(users, has_length(649))
 
-        self.db.insert_users_by_location(location, users)
+        unique_userids = {user["login"] for user in users}
+        assert_that(unique_userids, has_length(554))
+
+        for user in users:
+            self.db.insert_user(user, location)
+
         retrieved_users = self.db.get_users_by_location(location)
-        assert_that(retrieved_users, has_length(649))
+        assert_that(retrieved_users, has_length(554))
 
     def test_get_user(self):
-        self.db.insert_users_by_location(
-            "victoria",
-            json.loads(testutil.read("victoria_users.json"))
-        )
+        for user in json.loads(testutil.read("victoria_users.json")):
+            self.db.insert_user(user, "victoria")
 
         user = self.db.get_user("drusk")
 
@@ -76,7 +79,7 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
     def test_save_and_retrieve_user_who_was_not_already_in_database(self):
         user = json.loads(testutil.read("user_drusk.json"))
 
-        self.db.insert_user(user)
+        self.db.insert_user(user, "victoria")
 
         retrieved_user = self.db.get_user("drusk")
         assert_that(retrieved_user["login"], equal_to("drusk"))
@@ -94,7 +97,7 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
 
         user = json.loads(testutil.read("user_drusk.json"))
 
-        self.db.insert_user(user)
+        self.db.insert_user(user, "victoria")
 
         # Make sure language data is still there
         assert_that(self.db.get_user_language_stats(userid),
