@@ -8,6 +8,16 @@
         $(document).ready(function () {
             {# Need list filter because reverse returns an iterator. #}
             var stats = {{ language_stats|dictsort(by="value")|reverse|list|tojson }};
+
+            if (stats.length == 0) {
+                $("#user_languages_chart").remove();
+                $("#chart_container").append(
+                        "<br><h1 class='text-center'>" +
+                                "This user has no code in public repositories." +
+                                "</h1><br>");
+                return;
+            }
+
             createBarChart("user_languages_chart", stats);
         });
     </script>
@@ -18,7 +28,7 @@
     <h1 class="text-center">Languages in <b>{{ userid }}</b>'s public repositories:</h1>
     <h4 class="text-center"><i>(Measured in bytes as retrieved using the GitHub API)</i></h4>
 
-    <div class="container-canvas">
+    <div class="container-canvas" id="chart_container">
         <canvas id="user_languages_chart" width="800" height="400"></canvas>
     </div>
 
