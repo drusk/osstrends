@@ -85,18 +85,18 @@ class DataPipelineTest(unittest.TestCase):
         self.db.insert_user_language_stats.assert_called_once_with(
             "drusk", language_stats)
 
-    def test_user_filtered_due_to_wrong_location(self):
+    def test_user_filtered_due_to_stopword(self):
         location = Location("Victoria, BC, Canada",
-                            ["Victoria, BC", "Victoria, BC, Canada"],
+                            ["Australia", "Melbourne"],
                             "victoria")
 
         def get_full_details(userid):
             full_details = {"login": userid}
 
             if userid == "Bob":
-                full_details["location"] = "Victoria, Australia"
+                full_details["location"] = "Victoria, australia"
             elif userid == "drusk":
-                full_details["location"] = "Victoria, BC"
+                full_details["location"] = "VICTORIA"
             else:
                 raise ValueError("Unknown userid: %s" % userid)
 
@@ -114,7 +114,8 @@ class DataPipelineTest(unittest.TestCase):
         self.pipeline.process_user(user2, location)
 
         assert_that(self.searcher.search_user.call_count, equal_to(2))
-        assert_that(self.db.insert_user.call_count, equal_to(1))
+        self.db.insert_user.assert_called_once_with(
+            {"login": "drusk", "location": "VICTORIA"}, location.normalized)
 
 
 if __name__ == '__main__':

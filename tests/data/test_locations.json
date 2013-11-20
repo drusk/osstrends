@@ -1,29 +1,22 @@
 [
     {
         "normalized": "Victoria, BC, Canada",
-        "valid_variations": [
-            "Victoria, BC",
-            "Victoria, Canada",
-            "Victoria, BC, Canada"
+        "stopwords": [
+            "Melbourne",
+            "Australia"
         ],
         "search_term": "victoria",
         "include": true
     },
     {
         "normalized": "Vancouver, BC, Canada",
-        "valid_variations": [
-            "Vancouver, BC",
-            "Vancouver, Canada"
-        ],
+        "stopwords": [],
         "search_term": "vancouver",
         "include": false
     },
     {
         "normalized": "Seattle, WA, USA",
-        "valid_variations": [
-            "Seattle",
-            "Seattle, WA"
-        ],
+        "stopwords": [],
         "search_term": "seattle",
         "include": true
     }

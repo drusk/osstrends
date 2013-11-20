@@ -32,9 +32,9 @@ def path(filename):
 
 
 class Location(object):
-    def __init__(self, normalized, valid_variations, search_term):
+    def __init__(self, normalized, stopwords, search_term):
         self.normalized = normalized
-        self.valid_variations = valid_variations
+        self.stopwords = stopwords
         self.search_term = search_term
 
     def __repr__(self):
@@ -50,7 +50,7 @@ def load_locations(filename="locations.json"):
                 locations.append(
                     Location(
                         json_object["normalized"],
-                        json_object["valid_variations"],
+                        json_object["stopwords"],
                         json_object["search_term"]
                     )
                 )

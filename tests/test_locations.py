@@ -37,11 +37,10 @@ class LocationTest(unittest.TestCase):
         location2 = locations[1]
 
         assert_that(location1.normalized, equal_to("Victoria, BC, Canada"))
-        assert_that(location1.valid_variations,
+        assert_that(location1.stopwords,
                     contains_inanyorder(
-                        "Victoria, BC",
-                        "Victoria, Canada",
-                        "Victoria, BC, Canada"
+                        "Melbourne",
+                        "Australia"
                     ))
         assert_that(location1.search_term, equal_to("victoria"))
 

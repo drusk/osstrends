@@ -86,10 +86,15 @@ class DataPipeline(object):
 
         full_user_details = self.searcher.search_user(userid)
 
-        if full_user_details["location"] not in location.valid_variations:
-            # This is needed because searching for "Victoria" will return users from
-            # Victoria BC, but also from Victoria the Australian state.
-            return
+        raw_location = full_user_details["location"]
+        for stopword in location.stopwords:
+            if stopword.lower() in raw_location.lower():
+                logger.info("Found stopword (%s) in location '%s'" % (
+                    stopword, raw_location))
+
+                # This is needed because searching for "Victoria" will return users from
+                # Victoria BC, but also from Victoria the Australian state.
+                return
 
         self.db.insert_user(full_user_details, location.normalized)
 
