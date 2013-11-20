@@ -34,6 +34,7 @@ class MongoDatabase(object):
     USERID_KEY = "login"
     NORMALIZED_LOCATION_KEY = "location_normalized"
     LANGUAGES_KEY = "languages"
+    TOTAL_CODE_SIZE_KEY = "total_code_size"
 
     def __init__(self, db_name=DEFAULT_DB_NAME, host="localhost", port=27017):
         self._client = pymongo.MongoClient(
@@ -132,6 +133,7 @@ class MongoDatabase(object):
         """
         self._get_users_collection().update(
             {self.USERID_KEY: userid},
-            {"$set": {self.LANGUAGES_KEY: language_stats}},
+            {"$set": {self.LANGUAGES_KEY: language_stats,
+                      self.TOTAL_CODE_SIZE_KEY: sum(language_stats.values())}},
             upsert=True
         )

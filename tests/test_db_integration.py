@@ -75,6 +75,8 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
 
         assert_that(self.db.get_user_language_stats(userid),
                     equal_to(language_stats))
+        assert_that(self.db.get_user(userid)["total_code_size"],
+                    equal_to(19134))
 
     def test_save_and_retrieve_user_who_was_not_already_in_database(self):
         user = json.loads(testutil.read("user_drusk.json"))

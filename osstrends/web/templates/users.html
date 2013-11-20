@@ -32,6 +32,7 @@
                     <th>Name</th>
                     <th>GitHub Username</th>
                     <th>Company</th>
+                    <th>Public Code (Bytes)</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -44,6 +45,7 @@
                                 {{ user.company }}
                             {% endif %}
                         </td>
+                        <td>{{ user.total_code_size }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
