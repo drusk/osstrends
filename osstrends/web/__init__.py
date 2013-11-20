@@ -37,6 +37,11 @@ def location_selection():
     return render_template("location_selection.html", locations=locations)
 
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
 @app.route("/users")
 def users_by_location():
     location = request.args["location"]
