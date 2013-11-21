@@ -16,12 +16,12 @@
 
     <nav class="navbar navbar-default" role="navigation">
         <a href="{{ url_for("location_selection") }}"
-           class="btn btn-default navbar-left">Home</a>
+           class="btn btn-default navbar-btn navbar-left">Home</a>
 
         {% block custom_nav_items %}{% endblock %}
 
         <a href="{{ url_for("about") }}"
-           class="btn btn-default navbar-right">About this application</a>
+           class="btn btn-default navbar-btn navbar-right">About this application</a>
     </nav>
 
     {% block body %}{% endblock %}
