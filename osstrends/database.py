@@ -20,6 +20,8 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
+import collections
+
 import pymongo
 
 
@@ -137,3 +139,24 @@ class MongoDatabase(object):
                       self.TOTAL_CODE_SIZE_KEY: sum(language_stats.values())}},
             upsert=True
         )
+
+    def get_location_language_stats(self, location_normalized):
+        """
+        Retrieves programming language statistics for a location which are
+        aggregated from all the individual users in that location.
+
+        Args:
+          location_normalized: str
+
+        Returns:
+          language_stats: dict
+            Keys are the language names, values are the number of bytes
+            written in that language.
+        """
+        language_stats = collections.defaultdict(int)
+
+        for user in self.get_users_by_location(location_normalized):
+            for language, count in user[self.LANGUAGES_KEY].iteritems():
+                language_stats[language] += count
+
+        return language_stats

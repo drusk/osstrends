@@ -105,6 +105,50 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
         assert_that(self.db.get_user_language_stats(userid),
                     equal_to(language_stats))
 
+    def test_get_location_language_stats(self):
+        def add_user(userid, normalized_location, language_stats):
+            self.db.insert_user({"login": userid}, normalized_location)
+            self.db.insert_user_language_stats(userid, language_stats)
+
+        location1 = "Victoria, BC, Canada"
+        location2 = "Vancouver, BC, Canada"
+
+        add_user("drusk", location1,
+                 {
+                     "Python": 12345,
+                     "Java": 6789
+                 })
+        add_user("rrusk", location1,
+                 {
+                     "Java": 9876,
+                     "C": 5678
+                 })
+        add_user("bill", location2,
+                 {
+                     "Python": 54321,
+                     "C++": 6789
+                 })
+        add_user("bob", location2,
+                 {
+                     "Javascript": 12345,
+                     "Python": 6789,
+                     "C++": 999
+                 })
+
+        assert_that(self.db.get_location_language_stats(location1),
+                    equal_to({
+                        "Python": 12345,
+                        "Java": 16665,
+                        "C": 5678
+                    }))
+
+        assert_that(self.db.get_location_language_stats(location2),
+                    equal_to({
+                        "Python": 61110,
+                        "Javascript": 12345,
+                        "C++": 7788,
+                    }))
+
 
 if __name__ == '__main__':
     unittest.main()
