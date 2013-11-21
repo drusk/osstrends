@@ -20,13 +20,14 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
+import json
 import unittest
 
 from hamcrest import assert_that, equal_to, has_length, contains_inanyorder, none
 import httpretty
 from mock import Mock
 
-from osstrends.github import GitHubSearcher
+from osstrends.github import GitHubSearcher, RateLimitException
 from tests import testutil
 
 
@@ -140,13 +141,36 @@ class GitHubSearcherTest(unittest.TestCase):
         assert_that(user["followers"], equal_to(1))
         assert_that(user["following"], equal_to(0))
 
-    def mock_uri(self, uri, response_data, status=200):
+    @httpretty.activate
+    def test_rate_limit_exception_raised(self):
+        response = json.dumps({
+            "message": "API rate limit exceeded. See "
+                       "http://developer.github.com/v3/#rate-limiting "
+                       "for details."
+        })
+
+        self.mock_uri("https://api.github.com/users/drusk", response,
+                      status=403, headers={"X-RateLimit-Remaining": 0,
+                                           "X-RateLimit-Reset": 1372700873})
+
+        try:
+            self.searcher.search_user("drusk")
+            self.fail("Should have raised RateLimitException.")
+        except RateLimitException as exception:
+            assert_that(exception.reset_time, equal_to(1372700873))
+
+    def mock_uri(self, uri, response_data, status=200, headers=None):
+        if headers is None:
+            headers = {"X-RateLimit-Remaining": 100,
+                       "X-RateLimit-Reset": 123456789}
+
         httpretty.register_uri(httpretty.GET,
                                uri,
                                responses=[
                                    httpretty.Response(
                                        body=response_data,
-                                       status=status
+                                       status=status,
+                                       adding_headers=headers
                                    )
                                ])
 

@@ -28,6 +28,16 @@ import requests
 from osstrends import auth
 
 
+class RateLimitException(Exception):
+    """
+    API rate limit exceeded.
+    """
+
+    def __init__(self, reset_time):
+        super(RateLimitException, self).__init__()
+        self.reset_time = reset_time
+
+
 class GitHubSearcher(object):
     """
     Performs searches on the GitHub API.
@@ -213,7 +223,12 @@ class GitHubSearcher(object):
                 headers = {}
             headers.update(self.GH_SEARCH_HEADERS)
 
-        return requests.get(url,
-                            params=params,
-                            headers=self.GH_SEARCH_HEADERS,
-                            auth=(auth.GH_AUTH_USERNAME, auth.GH_AUTH_TOKEN))
+        response = requests.get(url,
+                                params=params,
+                                headers=self.GH_SEARCH_HEADERS,
+                                auth=(auth.GH_AUTH_USERNAME, auth.GH_AUTH_TOKEN))
+
+        if response.headers["X-RateLimit-Remaining"] == "0":
+            raise RateLimitException(int(response.headers["X-RateLimit-Reset"]))
+
+        return response
