@@ -59,6 +59,10 @@ class DataPipeline(object):
     def _initialize_workers(self):
         for _ in xrange(self.num_threads):
             worker = ErrorTolerantThread(self._work_queue, self.process_user)
+
+            # Kill threads once the rest of the program has finished.
+            worker.daemon = True
+
             self._workers.append(worker)
             worker.start()
 
