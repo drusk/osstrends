@@ -21,6 +21,11 @@
     </script>
 {% endblock %}
 
+{% block custom_nav_items %}
+        <a href="{{ url_for("location_languages", location_normalized=location) }}"
+           class="btn btn-default navbar-btn">Language Summary and Developer Search</a>
+{% endblock %}
+
 {% block body %}
     <h2 class="page-header" align="center">Developers in {{ location }}:</h2>
 

@@ -59,5 +59,11 @@ def user_languages(userid):
                            language_stats=language_stats)
 
 
+@app.route("/location/<location_normalized>")
+def location_languages(location_normalized):
+    return render_template("location_languages.html",
+                           location=location_normalized)
+
+
 if __name__ == "__main__":
     app.run()

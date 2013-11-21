@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block custom_nav_items %}
+        <a href="{{ url_for("users_by_location", location=location) }}"
+           class="btn btn-default navbar-btn">Back to User List</a>
+{% endblock %}
+
+{% block body %}
+    <h1>Hello, {{ location }}</h1>
+    <p>(Under construction)</p>
+{% endblock %}
