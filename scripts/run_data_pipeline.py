@@ -21,11 +21,31 @@
 __author__ = "David Rusk <drusk@uvic.ca>"
 
 import logging
+import os
+import time
 
 from osstrends import pipeline
 
-logging.basicConfig(filename="datapipeline.log", level=logging.INFO,
-                    format="%(asctime)-15s %(message)s")
+
+def current_dir():
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def main():
+    logname = "datapipeline.log"
+    dir = current_dir()
+    fullpath = os.path.join(dir, logname)
+
+    # Keep the old log files.
+    if os.path.exists(fullpath):
+        os.rename(fullpath,
+                  os.path.join(dir, "%s.%d" % (logname, int(time.time()))))
+
+    logging.basicConfig(filename=logname, level=logging.INFO,
+                        format="%(asctime)-15s %(message)s")
+
+    pipeline.execute()
+
 
 if __name__ == "__main__":
-    pipeline.execute()
+    main()

@@ -48,5 +48,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,  # Include data specified in MANIFEST.in
     zip_safe=False,
-    install_requires=parse_requirements()
+    install_requires=parse_requirements(),
+    scripts=["scripts/run_data_pipeline.py"]
 )
