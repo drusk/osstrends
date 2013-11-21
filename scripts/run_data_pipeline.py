@@ -42,7 +42,7 @@ def main():
                   os.path.join(dir, "%s.%d" % (logname, int(time.time()))))
 
     logging.basicConfig(filename=logname, level=logging.INFO,
-                        format="%(asctime)-15s %(message)s")
+                        format="%(levelname)s %(asctime)-15s %(message)s")
 
     pipeline.execute()
 
