@@ -61,8 +61,10 @@ def user_languages(userid):
 
 @app.route("/location/<location_normalized>")
 def location_languages(location_normalized):
+    language_stats = db.get_location_language_stats(location_normalized)
     return render_template("location_languages.html",
-                           location=location_normalized)
+                           location=location_normalized,
+                           language_stats=language_stats)
 
 
 if __name__ == "__main__":

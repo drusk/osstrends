@@ -1,11 +1,43 @@
 {% extends "base.html" %}
 
+{% block custom_js %}
+    <script src="{{ url_for("static", filename="vendor/jquery-1.10.2.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="vendor/Chart-0.2.0.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="language_chart.js") }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            {# Need list filter because reverse returns an iterator. #}
+            var stats = {{ language_stats|dictsort(by="value")|reverse|list|tojson }};
+
+            if (stats.length == 0) {
+                $("#languages_chart").remove();
+                $("#chart_container").append(
+                        "<br><h1 class='text-center'>" +
+                                "No code found for this location." +
+                                "</h1><br>");
+                return;
+            }
+
+            // Only show the 10 most popular languages
+            stats = stats.slice(0, 10);
+
+            createBarChart("languages_chart", stats);
+        });
+    </script>
+{% endblock %}
+
 {% block custom_nav_items %}
         <a href="{{ url_for("users_by_location", location=location) }}"
            class="btn btn-default navbar-btn">Back to User List</a>
 {% endblock %}
 
 {% block body %}
-    <h1>Hello, {{ location }}</h1>
-    <p>(Under construction)</p>
+
+    <h1 class="text-center">Popular languages in <b>{{ location }}</b></h1>
+    <h4 class="text-center"><i>(Measured in bytes as retrieved using the GitHub API)</i></h4>
+
+    <div class="container-canvas" id="chart_container">
+        <canvas id="languages_chart" width="800" height="400"></canvas>
+    </div>
+
 {% endblock %}
