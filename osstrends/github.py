@@ -178,6 +178,15 @@ class GitHubSearcher(object):
             # This repo is not a fork, it is its own source
             return owner, repo_name
 
+    def rate_limit(self):
+        """
+        Convenience method for checking the rate limit.  Normally the
+        application will use exceptions when the rate limit is reached in
+        order to handle back-off.
+        http://developer.github.com/v3/rate_limit/
+        """
+        return self._gh_http_get("/rate_limit").json()
+
     def _gh_http_get(self, url, params=None, headers=None):
         """
         Performs an HTTP request for the specified GitHub API endpoint.
