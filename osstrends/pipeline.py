@@ -23,9 +23,10 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 import logging
 import Queue
 import threading
+import time
 
 from osstrends.database import MongoDatabase
-from osstrends.github import GitHubSearcher
+from osstrends.github import GitHubSearcher, RateLimitException
 from osstrends.locations import load_locations
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ class DataPipeline(object):
 
     def _initialize_workers(self):
         for _ in xrange(self.num_threads):
-            worker = ErrorTolerantThread(self._work_queue, self.process_user)
+            worker = WorkerThread(self._work_queue, self.process_user)
 
             # Kill threads once the rest of the program has finished.
             worker.daemon = True
@@ -135,31 +136,45 @@ class DataPipeline(object):
             "Finished processing user: {}".format(userid))
 
 
-class ErrorTolerantThread(threading.Thread):
+class WorkerThread(threading.Thread):
     def __init__(self, work_queue, work_function):
-        super(ErrorTolerantThread, self).__init__()
+        super(WorkerThread, self).__init__()
 
         self.work_queue = work_queue
         self.work_function = work_function
 
+        # Wait a few extra seconds past the designated API reset time
+        self.sleep_buffer = 10
+
     def run(self):
         while True:
             user, location = self.work_queue.get()
+            self.process(user, location)
 
-            try:
-                self.work_function(user, location)
-                self.work_queue.task_done()
-            except Exception as error:
-                logger.error(str(error))
+    def process(self, user, location):
+        try:
+            self.work_function(user, location)
+            self.work_queue.task_done()
+        except RateLimitException as error:
+            logger.warn(str(error))
+            self.requeue(user, location)
+            self.sleep_until(error.reset_time + self.sleep_buffer)
+        except Exception as error:
+            logger.error(error)
+            self.requeue(user, location)
 
-                # Put it back on the queue
-                self.work_queue.put((user, location))
+    def requeue(self, user, location):
+        # Put it back on the queue
+        self.work_queue.put((user, location))
 
-                # Mark the current attempt done even though it failed.  Otherwise
-                # the number of puts will become larger than the number of calls
-                # to task_done, and the call to join will never unblock even once
-                # all the work is done.
-                self.work_queue.task_done()
+        # Mark the current attempt done even though it failed.  Otherwise
+        # the number of puts will become larger than the number of calls
+        # to task_done, and the call to join will never unblock even once
+        # all the work is done.
+        self.work_queue.task_done()
+
+    def sleep_until(self, wakeup_time):
+        time.sleep(wakeup_time - time.time())
 
 
 def execute():

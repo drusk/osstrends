@@ -37,6 +37,9 @@ class RateLimitException(Exception):
         super(RateLimitException, self).__init__()
         self.reset_time = reset_time
 
+    def __str__(self):
+        return "Rate limit exceeded.  Resets at %d" % self.reset_time
+
 
 class GitHubSearcher(object):
     """

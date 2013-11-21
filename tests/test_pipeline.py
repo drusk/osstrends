@@ -20,15 +20,16 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
+import Queue
 import unittest
 
 from hamcrest import assert_that, contains, equal_to
 from mock import Mock, MagicMock, call
 
 from osstrends.database import MongoDatabase
-from osstrends.github import GitHubSearcher
+from osstrends.github import GitHubSearcher, RateLimitException
 from osstrends.locations import Location, load_locations
-from osstrends.pipeline import DataPipeline
+from osstrends.pipeline import DataPipeline, WorkerThread
 import testutil
 
 
@@ -117,6 +118,28 @@ class DataPipelineTest(unittest.TestCase):
         assert_that(self.searcher.search_user.call_count, equal_to(2))
         self.db.insert_user.assert_called_once_with(
             {"login": "drusk", "location": "VICTORIA"}, location.normalized)
+
+
+class WorkerThreadTest(unittest.TestCase):
+    def setUp(self):
+        self.work_queue = Mock(spec=Queue.Queue)
+
+    def test_rate_limit_exception_causes_sleep_and_requeue(self):
+        user = Mock()
+        location = Mock()
+
+        def work_function(user, location):
+            raise RateLimitException(1372700873)
+
+        worker = WorkerThread(self.work_queue, work_function)
+        worker.requeue = Mock()
+        worker.sleep_until = Mock()
+
+        worker.process(user, location)
+
+        worker.requeue.assert_called_once_with(user, location)
+        worker.sleep_until.assert_called_once_with(
+            1372700873 + worker.sleep_buffer)
 
 
 if __name__ == '__main__':
