@@ -39,6 +39,7 @@ class DataPipelineTest(unittest.TestCase):
         self.locations = load_locations(testutil.path("test_locations.json"))
 
         self.pipeline = DataPipeline(self.db, self.searcher, self.locations)
+        self.pipeline._initialize_workers = Mock()
 
     def test_execute_pipeline(self):
         self.pipeline.process_location = Mock()
@@ -51,7 +52,7 @@ class DataPipelineTest(unittest.TestCase):
                     contains(*[call(location) for location in self.locations]))
 
     def test_process_location(self):
-        self.pipeline.process_user = Mock()
+        self.pipeline.queue_user = Mock()
 
         num_users = 10
         users = [MagicMock() for _ in xrange(num_users)]
@@ -64,7 +65,7 @@ class DataPipelineTest(unittest.TestCase):
             location.search_term
         )
 
-        assert_that(self.pipeline.process_user.call_count, equal_to(num_users))
+        assert_that(self.pipeline.queue_user.call_count, equal_to(num_users))
 
     def test_process_user(self):
         full_user_details = {"location": "Victoria, BC"}

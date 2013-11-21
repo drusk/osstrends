@@ -24,7 +24,8 @@ import logging
 
 from osstrends import pipeline
 
-logging.basicConfig(filename="datapipeline.log", level=logging.DEBUG)
+logging.basicConfig(filename="datapipeline.log", level=logging.INFO,
+                    format="%(asctime)-15s %(message)s")
 
 if __name__ == "__main__":
     pipeline.execute()

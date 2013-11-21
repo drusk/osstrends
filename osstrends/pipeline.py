@@ -21,6 +21,8 @@
 __author__ = "David Rusk <drusk@uvic.ca>"
 
 import logging
+import Queue
+import threading
 
 from osstrends.database import MongoDatabase
 from osstrends.github import GitHubSearcher
@@ -34,7 +36,7 @@ class DataPipeline(object):
     The main pipeline for acquiring the application's data.
     """
 
-    def __init__(self, db, searcher, locations):
+    def __init__(self, db, searcher, locations, num_threads=10):
         """
         Constructor.
 
@@ -49,6 +51,17 @@ class DataPipeline(object):
         self.searcher = searcher
         self.locations = locations
 
+        self._work_queue = Queue.Queue()
+        self._workers = []
+
+        self.num_threads = num_threads
+
+    def _initialize_workers(self):
+        for _ in xrange(self.num_threads):
+            worker = ErrorTolerantThread(self._work_queue, self.process_user)
+            self._workers.append(worker)
+            worker.start()
+
     def execute(self):
         """
         Runs the pipeline.
@@ -56,8 +69,12 @@ class DataPipeline(object):
         # Remove the old data
         self.db.delete_users()
 
+        self._initialize_workers()
+
         for location in self.locations:
             self.process_location(location)
+
+        self._work_queue.join()
 
     def process_location(self, location):
         """
@@ -70,11 +87,14 @@ class DataPipeline(object):
 
         users = self.searcher.search_users_by_location(location.search_term)
 
-        logger.info("Got users for location: {}".format(
+        logger.debug("Got users for location: {}".format(
             location.search_term))
 
         for user in users:
-            self.process_user(user, location)
+            self.queue_user(user, location)
+
+    def queue_user(self, user, location):
+        self._work_queue.put((user, location))
 
     def process_user(self, user, location):
         """
@@ -98,9 +118,9 @@ class DataPipeline(object):
 
         self.db.insert_user(full_user_details, location.normalized)
 
-        logger.info("Retrieved user info for {}".format(userid))
+        logger.debug("Retrieved user info for {}".format(userid))
 
-        logger.info(
+        logger.debug(
             "Starting collection of language stats for user: {}".format(
                 userid))
 
@@ -108,8 +128,34 @@ class DataPipeline(object):
         self.db.insert_user_language_stats(userid, language_stats)
 
         logger.info(
-            "Finished collecting language stats for user: {}".format(
-                userid))
+            "Finished processing user: {}".format(userid))
+
+
+class ErrorTolerantThread(threading.Thread):
+    def __init__(self, work_queue, work_function):
+        super(ErrorTolerantThread, self).__init__()
+
+        self.work_queue = work_queue
+        self.work_function = work_function
+
+    def run(self):
+        while True:
+            user, location = self.work_queue.get()
+
+            try:
+                self.work_function(user, location)
+                self.work_queue.task_done()
+            except Exception as error:
+                logger.error(str(error))
+
+                # Put it back on the queue
+                self.work_queue.put((user, location))
+
+                # Mark the current attempt done even though it failed.  Otherwise
+                # the number of puts will become larger than the number of calls
+                # to task_done, and the call to join will never unblock even once
+                # all the work is done.
+                self.work_queue.task_done()
 
 
 def execute():
