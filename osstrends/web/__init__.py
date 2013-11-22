@@ -67,5 +67,17 @@ def location_languages(location_normalized):
                            language_stats=language_stats)
 
 
+@app.route("/users/location_language")
+def users_by_location_and_language():
+    location = request.args["location"]
+    language = request.args["language"]
+
+    users = db.get_users(location=location, language=language)
+    return render_template("users_by_location_and_language.html",
+                           users=users,
+                           location=location,
+                           language=language)
+
+
 if __name__ == "__main__":
     app.run()
