@@ -45,7 +45,7 @@ def about():
 @app.route("/users")
 def users_by_location():
     location = request.args["location"]
-    users = db.get_users_by_location(location)
+    users = db.get_users(location=location)
     return render_template("users.html", location=location, users=users)
 
 

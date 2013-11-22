@@ -87,23 +87,33 @@ class MongoDatabase(object):
             upsert=True
         )
 
-    def get_users_by_location(self, location):
+    def get_users(self, location=None, language=None):
         """
-        Lookup users by location from the database.
+        Lookup users by location and/or language from the database.
 
         Args:
           location: str
-            Find users from this location (ex: Victoria).
+            Find users from this location.  Must be normalized.
+          language: str
+            Only return users who have code in this programming language.
 
         Returns:
           users: list(dict)
             A list of user information objects
             (http://developer.github.com/v3/users/).
-            Returns an empty list if there are no users for that location.
+            Returns an empty list if there are no users for that
+            location/language.
         """
-        return list(self._get_users_collection().find(
-            {self.NORMALIZED_LOCATION_KEY: location})
-        )
+        query = {}
+
+        if location is not None:
+            query[self.NORMALIZED_LOCATION_KEY] = location
+
+        if language is not None:
+            key = "%s.%s" % (self.LANGUAGES_KEY, language)
+            query[key] = {"$exists": True}
+
+        return list(self._get_users_collection().find(query))
 
     def get_user_language_stats(self, userid):
         """
@@ -155,7 +165,7 @@ class MongoDatabase(object):
         """
         language_stats = collections.defaultdict(int)
 
-        for user in self.get_users_by_location(location_normalized):
+        for user in self.get_users(location=location_normalized):
             for language, count in user[self.LANGUAGES_KEY].iteritems():
                 language_stats[language] += count
 

@@ -23,7 +23,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 import json
 import unittest
 
-from hamcrest import assert_that, equal_to, has_length
+from hamcrest import assert_that, equal_to, has_length, contains_inanyorder
 import pymongo
 
 from osstrends.database import MongoDatabase
@@ -40,7 +40,7 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
 
     def test_save_and_retrieve_users_by_location(self):
         location = "victoria"
-        retrieved_users = self.db.get_users_by_location(location)
+        retrieved_users = self.db.get_users(location=location)
         assert_that(retrieved_users, has_length(0))
 
         users = json.loads(testutil.read("victoria_users.json"))
@@ -52,7 +52,7 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
         for user in users:
             self.db.insert_user(user, location)
 
-        retrieved_users = self.db.get_users_by_location(location)
+        retrieved_users = self.db.get_users(location=location)
         assert_that(retrieved_users, has_length(554))
 
     def test_get_user(self):
@@ -105,35 +105,35 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
         assert_that(self.db.get_user_language_stats(userid),
                     equal_to(language_stats))
 
-    def test_get_location_language_stats(self):
-        def add_user(userid, normalized_location, language_stats):
-            self.db.insert_user({"login": userid}, normalized_location)
-            self.db.insert_user_language_stats(userid, language_stats)
+    def add_user(self, userid, normalized_location, language_stats):
+        self.db.insert_user({"login": userid}, normalized_location)
+        self.db.insert_user_language_stats(userid, language_stats)
 
+    def test_get_location_language_stats(self):
         location1 = "Victoria, BC, Canada"
         location2 = "Vancouver, BC, Canada"
 
-        add_user("drusk", location1,
-                 {
-                     "Python": 12345,
-                     "Java": 6789
-                 })
-        add_user("rrusk", location1,
-                 {
-                     "Java": 9876,
-                     "C": 5678
-                 })
-        add_user("bill", location2,
-                 {
-                     "Python": 54321,
-                     "C++": 6789
-                 })
-        add_user("bob", location2,
-                 {
-                     "Javascript": 12345,
-                     "Python": 6789,
-                     "C++": 999
-                 })
+        self.add_user("drusk", location1,
+                      {
+                          "Python": 12345,
+                          "Java": 6789
+                      })
+        self.add_user("rrusk", location1,
+                      {
+                          "Java": 9876,
+                          "C": 5678
+                      })
+        self.add_user("bill", location2,
+                      {
+                          "Python": 54321,
+                          "C++": 6789
+                      })
+        self.add_user("bob", location2,
+                      {
+                          "Javascript": 12345,
+                          "Python": 6789,
+                          "C++": 999
+                      })
 
         assert_that(self.db.get_location_language_stats(location1),
                     equal_to({
@@ -148,6 +148,100 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
                         "Javascript": 12345,
                         "C++": 7788,
                     }))
+
+    def test_get_users_by_language(self):
+        location1 = "Victoria, BC, Canada"
+        location2 = "Vancouver, BC, Canada"
+
+        self.add_user("drusk", location1,
+                      {
+                          "Python": 12345,
+                          "Java": 6789
+                      })
+        self.add_user("rrusk", location1,
+                      {
+                          "Java": 9876,
+                          "C": 5678
+                      })
+        self.add_user("bill", location2,
+                      {
+                          "Python": 54321,
+                          "C++": 6789
+                      })
+        self.add_user("bob", location2,
+                      {
+                          "Javascript": 12345,
+                          "Python": 6789,
+                          "C++": 999
+                      })
+
+        users = self.db.get_users(language="Python")
+        userids = [user["login"] for user in users]
+
+        assert_that(userids, contains_inanyorder("drusk", "bill", "bob"))
+
+    def test_get_users_by_location_and_language(self):
+        location1 = "Victoria, BC, Canada"
+        location2 = "Vancouver, BC, Canada"
+
+        self.add_user("drusk", location1,
+                      {
+                          "Python": 12345,
+                          "Java": 6789
+                      })
+        self.add_user("rrusk", location1,
+                      {
+                          "Java": 9876,
+                          "C": 5678
+                      })
+        self.add_user("bill", location2,
+                      {
+                          "Python": 54321,
+                          "C++": 6789
+                      })
+        self.add_user("bob", location2,
+                      {
+                          "Javascript": 12345,
+                          "Python": 6789,
+                          "C++": 999
+                      })
+
+        users = self.db.get_users(location=location1, language="Python")
+        userids = [user["login"] for user in users]
+
+        assert_that(userids, contains_inanyorder("drusk"))
+
+    def test_get_users_no_filters(self):
+        location1 = "Victoria, BC, Canada"
+        location2 = "Vancouver, BC, Canada"
+
+        self.add_user("drusk", location1,
+                      {
+                          "Python": 12345,
+                          "Java": 6789
+                      })
+        self.add_user("rrusk", location1,
+                      {
+                          "Java": 9876,
+                          "C": 5678
+                      })
+        self.add_user("bill", location2,
+                      {
+                          "Python": 54321,
+                          "C++": 6789
+                      })
+        self.add_user("bob", location2,
+                      {
+                          "Javascript": 12345,
+                          "Python": 6789,
+                          "C++": 999
+                      })
+
+        users = self.db.get_users()
+        userids = [user["login"] for user in users]
+
+        assert_that(userids,
+                    contains_inanyorder("drusk", "rrusk", "bill", "bob"))
 
 
 if __name__ == '__main__':
