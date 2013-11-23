@@ -9,27 +9,26 @@
     <script src="{{ url_for("static", filename="vendor/jquery-1.10.2.min.js") }}"></script>
     <script src="{{ url_for("static", filename="vendor/jquery.dataTables.min.js") }}"></script>
     <script src="{{ url_for("static", filename="vendor/datatables-bootstrap3/assets/js/datatables.js") }}"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#user_table").dataTable({
-                "sPaginationType": "bs_full",
-                "oLanguage": {
-                    "sSearch": "Search Fields:"
-                }
+    <script src="{{ url_for("static", filename="table.js") }}"></script>
+    {% block on_ready %}
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Sort on name, ascending
+                createDataTable("#user_table", 0, "asc");
             });
-        })
-    </script>
+        </script>
+    {% endblock %}
 {% endblock %}
 
 {% block custom_nav_items %}
-        <a href="{{ url_for("location_languages", location_normalized=location) }}"
-           class="btn btn-default navbar-btn">Language Summary and Developer Search</a>
+    <a href="{{ url_for("location_languages", location_normalized=location) }}"
+       class="btn btn-default navbar-btn">Language Summary and Developer Search</a>
 {% endblock %}
 
 {% block body %}
 
     <h2 class="page-header" align="center">
-    {% block heading %}Developers in <b>{{ location }}</b>:{% endblock %}
+        {% block heading %}Developers in <b>{{ location }}</b>:{% endblock %}
     </h2>
 
     <div class="container">
@@ -40,7 +39,7 @@
                     <th>Name</th>
                     <th>GitHub Username</th>
                     <th>Company</th>
-                    <th>Public Code (Bytes)</th>
+                    <th>{% block table_header_code %}Public Code (Bytes){% endblock %}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -53,7 +52,7 @@
                                 {{ user.company }}
                             {% endif %}
                         </td>
-                        <td>{{ user.total_code_size }}</td>
+                        <td>{% block table_data_code scoped %}{{ user.total_code_size }}{% endblock %}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

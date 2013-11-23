@@ -1,3 +1,16 @@
 {% extends "users.html" %}
 
+{% block on_ready %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Sort on amount of code, descending
+            createDataTable("#user_table", 3, "desc");
+        });
+    </script>
+{% endblock %}
+
 {% block heading %}<b>{{ language }}</b> developers in <b>{{ location }}</b>:{% endblock %}
+
+{% block table_header_code %}Public {{ language }} Code (Bytes){% endblock %}
+
+{% block table_data_code %}{{ user.languages.get(language) }}{% endblock %}
