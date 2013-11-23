@@ -9,7 +9,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             {# Need list filter because reverse returns an iterator. #}
-            var stats = {{ language_stats|dictsort(by="value")|reverse|list|tojson }};
+            var stats = {{ language_bytes|dictsort(by="value")|reverse|list|tojson }};
 
             if (stats.length == 0) {
                 $("#languages_chart").remove();
@@ -30,8 +30,8 @@
                 }
             });
 
-            // Sort by code size
-            dataTable.fnSort([[1,'desc']]);
+            // Sort by developer count at the beginning
+            dataTable.fnSort([[2,'desc']]);
         });
     </script>
 {% endblock %}
@@ -62,14 +62,16 @@
                 <tr>
                     <th>Programming Language</th>
                     <th>Public Code (Bytes)</th>
+                    <th>Developers</th>
                 </tr>
                 </thead>
                 <tbody>
                 {# TODO: remove duplication of this processing. #}
-                {% for language, bytes in language_stats|dictsort(by="value")|reverse|list %}
+                {% for language, bytes in language_bytes|dictsort(by="value")|reverse|list %}
                     <tr>
                         <td><a href="{{ url_for("users_by_location_and_language", location=location, language=language) }}">{{ language }}</a></td>
                         <td>{{ bytes }}</td>
+                        <td>{{ developer_counts.get(language) }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

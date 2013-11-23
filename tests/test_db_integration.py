@@ -135,18 +135,34 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
                           "C++": 999
                       })
 
-        assert_that(self.db.get_location_language_stats(location1),
+        language_bytes, developer_count = self.db.get_location_language_stats(
+            location1)
+        assert_that(language_bytes,
                     equal_to({
                         "Python": 12345,
                         "Java": 16665,
                         "C": 5678
                     }))
+        assert_that(developer_count,
+                    equal_to({
+                        "Python": 1,
+                        "Java": 2,
+                        "C": 1
+                    }))
 
-        assert_that(self.db.get_location_language_stats(location2),
+        language_bytes, developer_count = self.db.get_location_language_stats(
+            location2)
+        assert_that(language_bytes,
                     equal_to({
                         "Python": 61110,
                         "Javascript": 12345,
                         "C++": 7788,
+                    }))
+        assert_that(developer_count,
+                    equal_to({
+                        "Python": 2,
+                        "Javascript": 1,
+                        "C++": 2,
                     }))
 
     def test_get_users_by_language(self):

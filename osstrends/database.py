@@ -159,14 +159,19 @@ class MongoDatabase(object):
           location_normalized: str
 
         Returns:
-          language_stats: dict
+          language_bytes: dict
             Keys are the language names, values are the number of bytes
             written in that language.
+          developer_counts: dict
+            Keys are the language name, values are the number of developers
+            in the location with code in that language.
         """
-        language_stats = collections.defaultdict(int)
+        language_bytes = collections.defaultdict(int)
+        developer_counts = collections.defaultdict(int)
 
         for user in self.get_users(location=location_normalized):
             for language, count in user[self.LANGUAGES_KEY].iteritems():
-                language_stats[language] += count
+                language_bytes[language] += count
+                developer_counts[language] += 1
 
-        return language_stats
+        return language_bytes, developer_counts
