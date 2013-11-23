@@ -6,6 +6,7 @@
     <script src="{{ url_for("static", filename="language_chart.js") }}"></script>
     <script src="{{ url_for("static", filename="vendor/jquery.dataTables.min.js") }}"></script>
     <script src="{{ url_for("static", filename="vendor/datatables-bootstrap3/assets/js/datatables.js") }}"></script>
+    <script src="{{ url_for("static", filename="table.js") }}"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             {# Need list filter because reverse returns an iterator. #}
@@ -23,15 +24,8 @@
             // Only show the 10 most popular languages
             createBarChart("languages_chart", stats.slice(0, 10));
 
-            var dataTable = $("#language_table").dataTable({
-                "sPaginationType": "bs_full",
-                "oLanguage": {
-                    "sSearch": "Search Fields:"
-                }
-            });
-
-            // Sort by developer count at the beginning
-            dataTable.fnSort([[2,'desc']]);
+            // Sort by developer count by default
+            createDataTable("#language_table", 2, "desc");
         });
     </script>
 {% endblock %}
