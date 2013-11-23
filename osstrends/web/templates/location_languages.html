@@ -25,7 +25,7 @@
             }
 
             // Only show the 10 most popular languages
-            createBarChart("languages_chart", byte_stats.slice(0, 10));
+            createBarChart("languages_chart", developer_stats.slice(0, 10));
 
             // Sort by developer count by default
             createDataTable("language_table", 2, "desc");
@@ -63,8 +63,8 @@
 
     <div class="text-center">
         <div class="btn-group">
-            <button type="button" class="btn btn-success" id="by_code_btn">By Code Size (Bytes)</button>
-            <button type="button" class="btn btn-default" id="by_dev_btn">By Number of Developers</button>
+            <button type="button" class="btn btn-success" id="by_dev_btn">By Number of Developers</button>
+            <button type="button" class="btn btn-default" id="by_code_btn">By Code Size (Bytes)</button>
         </div>
     </div>
 
