@@ -31,6 +31,10 @@
  *        or "desc" for descending.
  */
 function createDataTable(elementId, sortColumn, direction) {
+    if (elementId[0] != "#") {
+        elementId = "#" + elementId;
+    }
+
     var dataTable = $(elementId).dataTable({
         "sPaginationType": "bs_full",
         "oLanguage": {

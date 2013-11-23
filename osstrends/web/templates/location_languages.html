@@ -15,6 +15,8 @@
 
             if (byte_stats.length == 0) {
                 $("#languages_chart").remove();
+                $("#by_code_btn").remove();
+                $("#by_dev_btn").remove();
                 $("#chart_container").append(
                         "<br><h1 class='text-center'>" +
                                 "No code found for this location." +
@@ -26,7 +28,7 @@
             createBarChart("languages_chart", byte_stats.slice(0, 10));
 
             // Sort by developer count by default
-            createDataTable("#language_table", 2, "desc");
+            createDataTable("language_table", 2, "desc");
 
             // TODO clean up duplication
             $("#by_code_btn").click(function (event) {
@@ -73,7 +75,7 @@
     </div>
 
     <br><br>
-    <h1 class="text-center">Click on a language below to find developers.</h3>
+    <h1 class="text-center">Click on a language below to find developers.</h1>
         <br>
 
         <div class="container">
