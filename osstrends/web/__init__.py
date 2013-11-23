@@ -56,7 +56,8 @@ def user_languages(userid):
     return render_template("user_languages.html",
                            userid=userid,
                            github_page=user["html_url"],
-                           language_stats=language_stats)
+                           language_stats=language_stats,
+                           location=user["location_normalized"])
 
 
 @app.route("/location/<location_normalized>")

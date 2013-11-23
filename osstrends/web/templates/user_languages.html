@@ -23,6 +23,11 @@
     </script>
 {% endblock %}
 
+{% block custom_nav_items %}
+    <a href="{{ url_for("users_by_location", location=location) }}"
+       class="btn btn-default navbar-btn">Back to User List</a>
+{% endblock %}
+
 {% block body %}
 
     <h1 class="text-center">Languages in <b>{{ userid }}</b>'s public repositories:</h1>
