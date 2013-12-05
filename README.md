@@ -1,37 +1,39 @@
 OSS Trends
 ==============
 
-Open Source Software development activity by geographical location.
+A webapp for exploring Open Source Software development activity by
+geographical location.
 
-Design
-======
+Currently all data is collected from
+[GitHub's public API](http://developer.github.com/v3/).
 
-Data pipeline:
- -periodic process
- -input is list of locations
- -for each location find all users
- -for each user find all repositories
- -build link between locations and repositories people are working on
- -extract stats about projects, and technologies people in a location
-  are working on
+Features
+========
+* Find developers by location, including information such as company and
+  real name if provided.
+* Visualize a developer's programming language usage.
+* Visualize the popular languages in a location, based on either number of
+  developers or size of code.
+* Find developers who use a specific language in a specified location.
+* Sortable and filterable data table view of data.
 
-Web UI:
- -input location: select from map or autocompleting textbox?
-   -choice of location is controlled to something that can be mapped to a
-    database entry (due to variations in natural language)
+Technologies Used
+=================
+* Python and JavaScript
+* [Flask](http://flask.pocoo.org/)
+* [MongoDB](http://www.mongodb.org/) and
+  [PyMongo](https://github.com/mongodb/mongo-python-driver)
+* [Requests](http://requests.readthedocs.org/en/latest/)
+* [Bootstrap](http://getbootstrap.com/)
+* [jQuery](http://jquery.com/)
+* [DataTables](http://datatables.net/)
+* [Chart.js](http://www.chartjs.org/)
+* [Select2](http://ivaynberg.github.io/select2/)
 
-Database:
- -key-value store: compare performance vs relational database?
-
-Technologies:
- -requests for Github API access.
- -flask for lightweight web UI
- -MongoDB for key-value store, PostgreSQL for relational
-
-
-Problems Encountered:
- -rate limiting on search could be a problem.  Need a back-off mechanism.
-
-  Could also look into data from from http://www.githubarchive.org/ instead
-  ex: download activity for April 2012:
-    wget http://data.githubarchive.org/2012-04-{01..31}-{0..23}.json.gz
+Future Improvements
+===================
+* Find similar developers
+* Work in LinkedIn data?
+* Full repo analysis for tools, libraries and frameworks usage
+* Easy deployment and setup procedure for other locations.  Include admin
+  web interface for making configuration changes.
