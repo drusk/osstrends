@@ -47,8 +47,6 @@ class DataPipelineTest(unittest.TestCase):
 
         self.pipeline.execute()
 
-        self.db.delete_users.assert_called_once_with()
-
         assert_that(self.pipeline.process_location.call_args_list,
                     contains(*[call(location) for location in self.locations]))
 

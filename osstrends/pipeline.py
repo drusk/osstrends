@@ -71,9 +71,6 @@ class DataPipeline(object):
         """
         Runs the pipeline.
         """
-        # Remove the old data
-        self.db.delete_users()
-
         self._initialize_workers()
 
         for location in self.locations:
