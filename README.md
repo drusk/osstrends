@@ -17,6 +17,11 @@ Features
 * Find developers who use a specific language in a specified location.
 * Sortable and filterable data table view of data.
 
+Screenshots
+===========
+![Language usage in Victoria, BC](/docs/barchart.png?raw=true "Language usage in Victoria, BC")
+![JavaScript developers in Victoria, BC](/docs/datatable.png?raw=true "JavaScript developers in Victoria, BC")
+
 Technologies Used
 =================
 * Python and JavaScript
