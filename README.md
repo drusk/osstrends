@@ -19,7 +19,7 @@ Features
 
 Screenshots
 ===========
-![Language usage in Victoria, BC](/docs/barchart.png?raw=true "Language usage in Victoria, BC")
+![Programming language usage in Victoria, BC](/docs/barchart.png?raw=true "Programming language usage in Victoria, BC")
 ![JavaScript developers in Victoria, BC](/docs/datatable.png?raw=true "JavaScript developers in Victoria, BC")
 
 Technologies Used
