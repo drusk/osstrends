@@ -1,5 +1,7 @@
 OSS Trends
-==============
+==========
+
+[![Build Status](https://travis-ci.org/drusk/osstrends.svg?branch=master)](https://travis-ci.org/drusk/osstrends)
 
 A webapp for exploring Open Source Software development activity by
 geographical location.
