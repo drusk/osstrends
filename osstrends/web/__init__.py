@@ -21,9 +21,11 @@
 __author__ = "David Rusk <drusk@uvic.ca>"
 
 from flask import Flask, redirect, render_template, request
+from flask.ext.login import (LoginManager, login_required, login_user,
+                             logout_user)
 
 from osstrends import auth
-from osstrends.admin import LoginForm
+from osstrends.admin import Admin, LoginForm
 from osstrends.database import MongoDatabase
 from osstrends.locations import load_locations
 
@@ -31,8 +33,13 @@ from osstrends.locations import load_locations
 app = Flask(__name__)
 app.secret_key = auth.APP_SECRET_KEY
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "/login"
+
 db = MongoDatabase()
 locations = load_locations()
+admin = Admin(db)
 
 
 @app.route("/")
@@ -86,18 +93,39 @@ def users_by_location_and_language():
                            language=language)
 
 
+@login_manager.user_loader
+def load_admin_user(userid):
+    """
+    This callback is required by flask-login to reload the user object.
+    """
+    return admin
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    error = None
     login_form = LoginForm()
 
     if login_form.validate_on_submit():
-        # TODO actual login
-        return redirect("/admin")
+        if admin.validate_credentials(
+                login_form.username.data, login_form.password.data):
+            login_user(admin)
+            return redirect("/admin")
+        else:
+            error = "Username or password incorrect."
 
-    return render_template("admin/login.html", form=login_form)
+    return render_template("admin/login.html", form=login_form, error=error)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
 
 
 @app.route("/admin")
+@login_required
 def admin_main():
     return render_template("admin/main.html")
 

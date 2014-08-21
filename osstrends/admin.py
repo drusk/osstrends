@@ -29,3 +29,64 @@ class LoginForm(Form):
     username = StringField("username", validators=[
         Length(min=1, message="Please provide your username.")])
     password = PasswordField("password")
+
+
+class Admin(object):
+    """
+    Implements the interface required by flask-login for site users that
+    need authentication.
+    """
+
+    DEFAULT_USERNAME = "admin"
+    DEFAULT_PASSWORD = "admin"
+
+    def __init__(self, db):
+        self._db = db
+
+        if not db.is_admin_initialized():
+            db.set_admin(self.DEFAULT_USERNAME, self.DEFAULT_PASSWORD)
+
+    @property
+    def username(self):
+        return self.DEFAULT_USERNAME
+
+    def validate_credentials(self, provided_username, provided_password):
+        """
+        Returns True if the provided credentials match what's in the
+        database, and False if they do not match.
+        """
+        return self._db.validate_admin(provided_username, provided_password)
+
+    def change_password(self, new_password):
+        """
+        Update the administrator's password.
+        Returns void.
+        """
+        self._db.set_admin(self.DEFAULT_USERNAME, new_password)
+
+    def is_authenticated(self):
+        """
+        Required by flask-login.
+        Misleading name.  Just means that this user should be allowed
+        to authenticate.
+        """
+        return True
+
+    def is_active(self):
+        """
+        Required by flask-login.
+        Should return True unless the user has been banned, etc.
+        """
+        return True
+
+    def is_anonymous(self):
+        """
+        Required by flask-login.
+        """
+        return False
+
+    def get_id(self):
+        """
+        Required by flask-login.
+        """
+        return self.DEFAULT_USERNAME

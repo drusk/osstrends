@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block custom_nav_items %}
+    <a href="{{ url_for("logout") }}"
+       class="btn btn-danger navbar-btn">Log out</a>
+{% endblock %}
+
 {% block body %}
 
 <div class="text-center">

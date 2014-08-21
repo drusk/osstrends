@@ -23,6 +23,7 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 import collections
 
 import pymongo
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class MongoDatabase(object):
@@ -33,6 +34,11 @@ class MongoDatabase(object):
     DEFAULT_DB_NAME = "osstrends"
 
     USERS_COLLECTION = "users"
+    ADMIN_COLLECTION = "admins"
+
+    ADMIN_USERNAME_KEY = "username"
+    ADMIN_PASSWORD_KEY = "password"
+
     USERID_KEY = "login"
     NORMALIZED_LOCATION_KEY = "location_normalized"
     LANGUAGES_KEY = "languages"
@@ -46,6 +52,9 @@ class MongoDatabase(object):
 
     def _get_users_collection(self):
         return self._db[self.USERS_COLLECTION]
+
+    def _get_admin_collection(self):
+        return self._db[self.ADMIN_COLLECTION]
 
     def delete_users(self):
         self._get_users_collection().drop()
@@ -175,3 +184,55 @@ class MongoDatabase(object):
                 developer_counts[language] += 1
 
         return language_bytes, developer_counts
+
+    def is_admin_initialized(self):
+        """
+        Checks if the administrator account has been created.
+
+        Returns: bool
+          True if the administrator account has been created.
+        """
+        return self._get_admin_collection().count() > 0
+
+    def set_admin(self, username, password):
+        """
+        Sets the administrator username and password.
+
+        Args:
+          username: str
+            The administrator's username.
+          password: str
+            The administrator's password, which will be hashed for
+            security.
+
+        Returns: void
+        """
+        hashed_password = generate_password_hash(password)
+
+        self._get_admin_collection().update(
+            {self.ADMIN_USERNAME_KEY: username},
+            {
+                self.ADMIN_USERNAME_KEY: username,
+                self.ADMIN_PASSWORD_KEY: hashed_password
+            },
+            upsert=True
+        )
+
+    def validate_admin(self, username, password):
+        """
+        Checks if the username and password match the admin credentials
+        in the database.
+
+        Args:
+          username: str
+          password: str
+            The plain-text password
+
+        Returns: bool
+          True if the provided credentials match the database, false if
+          they do not.
+        """
+        admin = self._get_admin_collection().find_one()
+
+        return (admin[self.ADMIN_USERNAME_KEY] == username and
+                check_password_hash(admin[self.ADMIN_PASSWORD_KEY], password))

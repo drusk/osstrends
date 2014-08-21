@@ -26,6 +26,7 @@ import unittest
 from hamcrest import assert_that, equal_to, has_length, contains_inanyorder
 import pymongo
 
+from osstrends.admin import Admin
 from osstrends.database import MongoDatabase
 from tests import testutil
 
@@ -258,6 +259,34 @@ class MongoDatabaseIntegrationTest(unittest.TestCase):
 
         assert_that(userids,
                     contains_inanyorder("drusk", "rrusk", "bill", "bob"))
+
+    def test_default_admin_account(self):
+        assert_that(self.db.is_admin_initialized(), equal_to(False))
+
+        admin = Admin(self.db)
+        assert_that(self.db.is_admin_initialized(), equal_to(True))
+
+        assert_that(admin.username, equal_to(Admin.DEFAULT_USERNAME))
+        assert_that(
+            admin.validate_credentials(
+                Admin.DEFAULT_USERNAME, Admin.DEFAULT_PASSWORD),
+            equal_to(True))
+
+    def test_admin_change_password(self):
+        admin = Admin(self.db)
+
+        new_password = "newpassword"
+        admin.change_password(new_password)
+
+        assert_that(
+            admin.validate_credentials(
+                Admin.DEFAULT_USERNAME, Admin.DEFAULT_PASSWORD),
+            equal_to(False))
+
+        assert_that(
+            admin.validate_credentials(
+                Admin.DEFAULT_USERNAME, new_password),
+            equal_to(True))
 
 
 if __name__ == '__main__':

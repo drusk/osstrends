@@ -21,6 +21,9 @@
                     {% endfor %}
 
                     <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">{{ error }}</div>
+                    {% endif %}
                 </form>
             </div>
         </div>
