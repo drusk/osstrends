@@ -20,13 +20,16 @@
 
 __author__ = "David Rusk <drusk@uvic.ca>"
 
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request
 
+from osstrends import auth
+from osstrends.admin import LoginForm
 from osstrends.database import MongoDatabase
 from osstrends.locations import load_locations
 
 
 app = Flask(__name__)
+app.secret_key = auth.APP_SECRET_KEY
 
 db = MongoDatabase()
 locations = load_locations()
@@ -64,7 +67,7 @@ def user_languages(userid):
 def location_languages(location_normalized):
     language_bytes, developer_counts = db.get_location_language_stats(
         location_normalized)
-    
+
     return render_template("location_languages.html",
                            location=location_normalized,
                            language_bytes=language_bytes,
@@ -81,6 +84,22 @@ def users_by_location_and_language():
                            users=users,
                            location=location,
                            language=language)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    login_form = LoginForm()
+
+    if login_form.validate_on_submit():
+        # TODO actual login
+        return redirect("/admin")
+
+    return render_template("admin/login.html", form=login_form)
+
+
+@app.route("/admin")
+def admin_main():
+    return render_template("admin/main.html")
 
 
 if __name__ == "__main__":
