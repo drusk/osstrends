@@ -22,3 +22,5 @@ __author__ = "David Rusk <drusk@uvic.ca>"
 
 GH_AUTH_USERNAME = "put username here"
 GH_AUTH_TOKEN = "put access token here"
+
+APP_SECRET_KEY = "put app secret key here"
