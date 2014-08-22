@@ -7,8 +7,15 @@
 
 {% block body %}
 
-<div class="text-center">
-    <p><b>Under construction.  Admin functionality will go here.</b></p>
-</div>
+    <div class="container">
+        <p class="text-center">
+            <b>Tasks:</b>
+        </p>
+
+        <div class="btn-group-vertical btn-group-justified">
+            <a href="{{ url_for("admin_change_password") }}"
+               class="btn btn-default">Change password</a>
+        </div>
+    </div>
 
 {% endblock %}

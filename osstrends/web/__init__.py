@@ -25,7 +25,7 @@ from flask.ext.login import (LoginManager, login_required, login_user,
                              logout_user)
 
 from osstrends import auth
-from osstrends.admin import Admin, LoginForm
+from osstrends.admin import Admin, LoginForm, ChangePasswordForm
 from osstrends.database import MongoDatabase
 from osstrends.locations import load_locations
 
@@ -128,6 +128,23 @@ def logout():
 @login_required
 def admin_main():
     return render_template("admin/main.html")
+
+
+@app.route("/admin/password", methods=["GET", "POST"])
+@login_required
+def admin_change_password():
+    error = None
+    form = ChangePasswordForm()
+
+    if form.validate_on_submit():
+        if form.new_password.data == form.repeat_password.data:
+            admin.change_password(form.new_password.data)
+            # TODO notification of successfully changed password
+            return redirect("/admin")
+        else:
+            error = "New password and repeat don't match."
+
+    return render_template("admin/password.html", form=form, error=error)
 
 
 if __name__ == "__main__":

@@ -31,6 +31,11 @@ class LoginForm(Form):
     password = PasswordField("password")
 
 
+class ChangePasswordForm(Form):
+    new_password = PasswordField("new_password")
+    repeat_password = PasswordField("repeat_password")
+
+
 class Admin(object):
     """
     Implements the interface required by flask-login for site users that
